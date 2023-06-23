@@ -1,0 +1,13 @@
+*.key
+*.pem
+*.token
+
+.env
+.env.*
+
+.luarc.json
+plugin_state.txt
+lazy-lock.json
+
+spell/*
+tmp/*
