@@ -173,6 +173,7 @@ nvim
 
 ## Todo:
 
+- [ ] Migrate from lsp-zero to inbuilt lsp
 - [x] Remove null-ls related files
 - [x] Fix keymap
 - [x] Configure clang-format
