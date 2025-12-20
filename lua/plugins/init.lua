@@ -190,8 +190,8 @@ return {
             local normal_notify = { "nvim-tree.lua" }
 
             vim.notify = function(msg, level, opts)
-                local info = debug.getinfo(2, "S")
-                local source = string.replace(info.source, "@", "")
+                local info = debug.getinfo(2, "S") or {}
+                local source = string.replace((info.source or ""), "@", "")
                 local found = false
 
                 if opts and opts["normal_notify"] ~= nil and opts["normal_notify"] then
