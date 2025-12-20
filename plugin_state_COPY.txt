@@ -1,0 +1,46 @@
+status:
+1 NeogitOrg/neogit
+1 VonHeikemen/lsp-zero.nvim
+1 folke/which-key.nvim
+1 ggandor/leap.nvim
+1 hedyhli/outline.nvim
+1 ibhagwan/fzf-lua
+1 lervag/vimtex
+1 lewis6991/gitsigns.nvim
+1 lukas-reineke/indent-blankline.nvim
+1 numToStr/Comment.nvim
+1 nvim-lualine/lualine.nvim
+1 nvim-treesitter/nvim-treesitter
+1 nvim-treesitter/nvim-treesitter-textobjects
+1 rcarriga/nvim-notify
+1 sindrets/diffview.nvim
+1 stevearc/conform.nvim
+1 stevearc/oil.nvim
+1 yorickpeterse/nvim-window
+0 RRethy/vim-illuminate
+0 akinsho/bufferline.nvim
+0 folke/flash.nvim
+0 folke/twilight.nvim
+0 folke/zen-mode.nvim
+0 kevinhwang91/nvim-ufo
+0 m4xshen/hardtime.nvim
+0 romgrk/barbar.nvim
+0 stevearc/quicker.nvim
+
+themes:
+1 morhetz/gruvbox
+0 AstroNvim/astrotheme
+0 EdenEast/nightfox.nvim
+0 HoNamDuong/hybrid.nvim
+0 bluz71/vim-moonfly-colors
+0 catppuccin/nvim
+0 folke/tokyonight.nvim
+0 marko-cerovac/material.nvim
+0 navarasu/onedark.nvim
+0 nyoom-engineering/oxocarbon.nvim
+0 olimorris/onedarkpro.nvim
+0 rebelot/kanagawa.nvim
+0 rose-pine/neovim
+0 sainnhe/everforest
+0 slugbyte/lackluster.nvim
+
