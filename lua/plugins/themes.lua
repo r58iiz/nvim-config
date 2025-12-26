@@ -135,10 +135,10 @@ return {
         -- https://github.com/folke/tokyonight.nvim
         lazy = true,
         config = function()
-    -- colorscheme tokyonight-night
-    -- colorscheme tokyonight-storm
-    -- colorscheme tokyonight-moon
-    vim.cmd("colorscheme tokyonight-night")
+            -- colorscheme tokyonight-night
+            -- colorscheme tokyonight-storm
+            -- colorscheme tokyonight-moon
+            vim.cmd("colorscheme tokyonight-night")
         end,
     },
 
@@ -183,6 +183,14 @@ return {
             })
 
             vim.cmd("colorscheme kanso")
+        end,
+    },
+
+    ["vague-theme/vague.nvim"] = {
+        lazy = true,
+        config = function()
+            require("vague").setup({})
+            vim.cmd("colorscheme vague")
         end,
     },
 }
