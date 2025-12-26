@@ -159,4 +159,13 @@ return {
             vim.cmd("colorscheme hybrid")
         end,
     },
+
+    ["metalelf0/black-metal-theme-neovim"] = {
+        -- [Theme] Black Metal Theme Neovim
+        -- https://github.com/metalelf0/black-metal-theme-neovim
+        lazy = true,
+        config = function()
+            vim.cmd("colorscheme burzum")
+        end,
+    },
 }
