@@ -1,13 +1,13 @@
 local M = {}
 
 local plugin_loader = require("plugin_loader")
-plugin_loader.load_persistent_config()
-plugin_loader.populate_plugin_config()
 
-function M.if_enabled(plugin, module)
-    if plugin_loader.plugin_state[plugin] then
+function M.if_enabled(option_id, module)
+    if plugin_loader.is_enabled("plugins", option_id) then
         require(module)
+        return true
     end
+    return false
 end
 
 return M

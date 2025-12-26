@@ -1,138 +1,507 @@
 local M = {}
 
--- ============================================================================
--- Constants
--- ============================================================================
+-- ---------------------------------------------------------------------------
+-- UTILS
+-- ---------------------------------------------------------------------------
 
-local SECTIONS = {
-    state = "status:",
-    themes = "themes:",
-}
-
-local STATUS_ICONS = {
-    enabled = "🟢",
-    disabled = "🔴",
-}
-
-local KEYMAPS_TO_DISABLE = { "i", "I", "a", "A", "o", "O", "s", "S", "v", "V", "<C-v>", ":" }
-
--- ============================================================================
--- State
--- ============================================================================
-
-M.plugin_state = {}
-M.theme_state = {}
-M.plugins = {}
-
-M.buf = nil
-M.win = nil
-M.plugin_state_file_path = vim.fn.stdpath("config") .. "/plugin_state.txt"
-
--- ============================================================================
--- Utility Functions
--- ============================================================================
-
---- Deep merge two tables
----@param t1 table
----@param t2 table
----@return table
-local function deep_merge(t1, t2)
-    for k, v in pairs(t2) do
-        if type(v) == "table" and type(t1[k]) == "table" then
-            deep_merge(t1[k], v)
-        else
-            t1[k] = v
+local function is_array(t)
+    local n = 0
+    for k in pairs(t) do
+        if type(k) ~= "number" then
+            return false
+        end
+        if k > n then
+            n = k
         end
     end
-    return t1
+    return n == #t
 end
 
---- Trim whitespace and tabs from a string
----@param s string
----@return string
-local function trim(s)
-    return s:gsub("^%s+", ""):gsub("%s+$", ""):gsub("\t", "")
-end
-
---- Get line from current buffer at position n
----@param n? number Line number (defaults to cursor position)
----@return number, string Line number and line content
-local function get_line(n)
-    local pos = n or vim.api.nvim_win_get_cursor(0)[1]
-    local line = vim.api.nvim_buf_get_lines(0, pos - 1, pos, true)[1]
-    return pos, line
-end
-
---- Sort entries by state (enabled first) then alphabetically
----@param tbl table
----@return table
-local function sort_entries(tbl)
-    local entries = {}
-
-    for name, state in pairs(tbl) do
-        table.insert(entries, {
-            name = name,
-            state = state and 1 or 0,
-        })
-    end
-
-    table.sort(entries, function(a, b)
-        if a.state ~= b.state then
-            return a.state > b.state
-        end
-        return a.name < b.name
+local function escape_string(s)
+    return s:gsub("[%z\1-\31\\\"]", function(c)
+        return string.format("\\u%04x", c:byte())
     end)
-
-    return entries
 end
 
---- Custom sorter for display lines with status icons
----@param a string
----@param b string
----@return boolean
-local function sort_display_lines(a, b)
-    local a_enabled = a:match("^%s*" .. STATUS_ICONS.enabled)
-    local b_enabled = b:match("^%s*" .. STATUS_ICONS.enabled)
+local function encode_sorted(value)
+    local t = type(value)
 
-    if a_enabled ~= b_enabled then
-        return a_enabled and true or false
+    if t == "nil" then
+        return "null"
+    elseif t == "boolean" then
+        return value and "true" or "false"
+    elseif t == "number" then
+        return tostring(value)
+    elseif t == "string" then
+        return "\"" .. escape_string(value) .. "\""
+    elseif t == "table" then
+        if is_array(value) then
+            local parts = {}
+            for i = 1, #value do
+                parts[#parts + 1] = encode_sorted(value[i])
+            end
+            return "[" .. table.concat(parts, ",") .. "]"
+        else
+            local keys = {}
+            for k in pairs(value) do
+                if type(k) ~= "string" then
+                    error("JSON object keys must be strings")
+                end
+                keys[#keys + 1] = k
+            end
+
+            table.sort(keys, function(a, b)
+                local va = value[a]
+                local vb = value[b]
+
+                if type(va) == "boolean" and type(vb) == "boolean" and va ~= vb then
+                    return va == true
+                end
+
+                -- return a < b
+                return a:lower() < b:lower()
+            end)
+
+            local parts = {}
+            for _, k in ipairs(keys) do
+                parts[#parts + 1] = encode_sorted(k) .. ":" .. encode_sorted(value[k])
+            end
+            return "{" .. table.concat(parts, ",") .. "}"
+        end
     end
 
-    return a:lower() < b:lower()
+    error("Unsupported type: " .. t)
 end
 
---- Safely read file contents
----@param path string
----@return string|nil
-local function read_file(path)
-    local file = io.open(path, "r")
+-- ---------------------------------------------------------------------------
+-- SECTION TYPE DEFINITIONS
+-- ---------------------------------------------------------------------------
+
+local section_types = {
+    multiselect = {
+        render = function(option, is_selected)
+            local icon = is_selected and "🟢" or "🔴"
+            return string.format("  %s %s", icon, option.label)
+        end,
+
+        toggle = function(state, option_id)
+            local new_state = vim.deepcopy(state)
+            if state[option_id] == true then
+                new_state[option_id] = false
+            else
+                new_state[option_id] = true
+            end
+            return new_state
+        end,
+
+        validate = function(state)
+            return true
+        end,
+    },
+
+    singleselect = {
+        render = function(option, is_selected)
+            local icon = is_selected and "🟢" or "🔴"
+            return string.format("  %s %s", icon, option.label)
+        end,
+
+        toggle = function(state, option_id)
+            local new_state = {}
+            new_state[option_id] = true
+            return new_state
+        end,
+
+        validate = function(state)
+            local count = 0
+            for _, v in pairs(state) do
+                if v then
+                    count = count + 1
+                end
+            end
+            return count == 1
+        end,
+    },
+}
+
+-- ---------------------------------------------------------------------------
+-- PERSISTENCE LAYER
+-- ---------------------------------------------------------------------------
+
+local Persistence = {}
+
+function Persistence.load(filepath)
+    local file = io.open(filepath, "r")
     if not file then
         return nil
     end
 
     local content = file:read("*all")
     file:close()
-    return content
+
+    if content == "" then
+        return nil
+    end
+
+    local ok, decoded = pcall(vim.json.decode, content)
+    if ok then
+        return decoded
+    end
+
+    return nil
 end
 
---- Notify user with consistent formatting
----@param msg string
----@param level? number
-local function notify(msg, level)
-    vim.notify("[PluginLoader] " .. msg, level or vim.log.levels.INFO)
+function Persistence.save(filepath, state_data)
+    local dir = vim.fn.fnamemodify(filepath, ":h")
+    vim.fn.mkdir(dir, "p")
+
+    local file = io.open(filepath, "w")
+    if not file then
+        return false, "Cannot write to file"
+    end
+
+    -- file:write(vim.json.encode(state_data))
+    file:write(encode_sorted(state_data))
+    file:close()
+
+    return true
 end
 
--- ============================================================================
--- Core Plugin Management
--- ============================================================================
+-- ---------------------------------------------------------------------------
+-- STATE MANAGER
+-- ---------------------------------------------------------------------------
 
---- Ensure lazy.nvim is installed
+local State = {}
+State.__index = State
+
+function State.new(menu_config, initial_state)
+    local self = setmetatable({}, State)
+    self.sections = {}
+    self.listeners = {}
+    self.config = menu_config
+
+    for _, section in ipairs(menu_config.sections) do
+        local selection = {}
+        if initial_state and initial_state[section.id] then
+            selection = initial_state[section.id]
+        elseif section.default then
+            selection = section.default
+        end
+
+        self.sections[section.id] = {
+            type = section.type,
+            options = section.options,
+            selection = selection,
+        }
+    end
+
+    return self
+end
+
+function State:get_section(section_id)
+    return self.sections[section_id]
+end
+
+function State:toggle_option(section_id, option_id)
+    local section = self.sections[section_id]
+    local section_type = section_types[section.type]
+
+    section.selection = section_type.toggle(section.selection, option_id)
+    self:_notify_change()
+end
+
+function State:get_selected(section_id)
+    local section = self.sections[section_id]
+    local selected = {}
+
+    for option_id, is_selected in pairs(section.selection) do
+        if is_selected then
+            table.insert(selected, option_id)
+        end
+    end
+
+    return selected
+end
+
+function State:on_change(callback)
+    table.insert(self.listeners, callback)
+end
+
+function State:_notify_change()
+    for _, callback in ipairs(self.listeners) do
+        callback()
+    end
+end
+
+function State:export()
+    local exported = {}
+
+    for section_id, section_data in pairs(self.sections) do
+        exported[section_id] = {}
+
+        if self.config.save_mode == "enabled_only" then
+            for option_id, enabled in pairs(section_data.selection) do
+                if enabled then
+                    exported[section_id][option_id] = true
+                end
+            end
+        elseif self.config.save_mode == "touched" then
+            for id, v in pairs(section_data.selection) do
+                exported[section_id][id] = v
+            end
+        elseif self.config.save_mode == "all" then
+            for _, option in ipairs(section_data.options) do
+                exported[section_id][option.id] = section_data.selection[option.id] == true
+            end
+        end
+    end
+
+    return exported
+end
+
+function State:is_enabled(section_id, option_id)
+    local section = self.sections[section_id]
+    if not section then
+        return false
+    end
+    return section.selection[option_id] == true
+end
+
+function State:get_all_enabled()
+    local enabled = {}
+    for section_id, _ in pairs(self.sections) do
+        enabled[section_id] = self:get_selected(section_id)
+    end
+    return enabled
+end
+
+-- ---------------------------------------------------------------------------
+-- RENDERER
+-- ---------------------------------------------------------------------------
+
+local Renderer = {}
+Renderer.__index = Renderer
+
+function Renderer.new(state, config)
+    local self = setmetatable({}, Renderer)
+    self.state = state
+    self.config = config
+    self.buf = nil
+    self.win = nil
+    self.line_map = {}
+    return self
+end
+
+function Renderer:render()
+    if not self.buf or not vim.api.nvim_buf_is_valid(self.buf) then
+        self:_create_window()
+    end
+
+    self:_update_content()
+end
+
+function Renderer:_create_window()
+    self.buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_option(self.buf, "bufhidden", "wipe")
+    vim.api.nvim_buf_set_option(self.buf, "buftype", "nofile")
+    vim.api.nvim_buf_set_option(self.buf, "modifiable", false)
+
+    local width = math.floor(vim.o.columns * 0.6)
+    local height = math.floor(vim.o.lines * 0.8)
+    local row = math.floor((vim.o.lines - height) / 2)
+    local col = math.floor((vim.o.columns - width) / 2)
+
+    self.win = vim.api.nvim_open_win(self.buf, true, {
+        relative = "editor",
+        width = width,
+        height = height,
+        row = row,
+        col = col,
+        style = "minimal",
+        border = "rounded",
+    })
+
+    vim.api.nvim_win_set_option(self.win, "wrap", false)
+end
+
+function Renderer:_update_content()
+    local lines = {}
+    self.line_map = {}
+    local current_line = 0
+
+    for _, section_config in ipairs(self.config.sections) do
+        local section = self.state:get_section(section_config.id)
+        local section_type = section_types[section.type]
+
+        local enabled_count = 0
+        local total_count = #section.options
+        for _, is_enabled in pairs(section.selection) do
+            if is_enabled then
+                enabled_count = enabled_count + 1
+            end
+        end
+
+        local header = string.format("(%d/%d) %s", enabled_count, total_count, section_config.title)
+        table.insert(lines, header)
+        current_line = current_line + 1
+
+        local sorted_options = {}
+        for _, option in ipairs(section.options) do
+            local is_selected = section.selection[option.id] or false
+            table.insert(sorted_options, {
+                option = option,
+                is_selected = is_selected,
+            })
+        end
+
+        table.sort(sorted_options, function(a, b)
+            if a.is_selected ~= b.is_selected then
+                return a.is_selected
+            end
+            return a.option.label < b.option.label
+        end)
+
+        for _, item in ipairs(sorted_options) do
+            local line_text = section_type.render(item.option, item.is_selected)
+            table.insert(lines, line_text)
+
+            current_line = current_line + 1
+            self.line_map[current_line] = {
+                section_id = section_config.id,
+                option_id = item.option.id,
+            }
+        end
+
+        table.insert(lines, "")
+        current_line = current_line + 1
+    end
+
+    table.insert(
+        lines,
+        "─────────────────────────────────"
+    )
+    table.insert(lines, "  <Enter> Toggle  <q> Save & Quit  <Esc> Quit")
+
+    vim.api.nvim_buf_set_option(self.buf, "modifiable", true)
+    vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, lines)
+    vim.api.nvim_buf_set_option(self.buf, "modifiable", false)
+end
+
+function Renderer:get_item_at_cursor()
+    local line = vim.api.nvim_win_get_cursor(self.win)[1]
+    return self.line_map[line]
+end
+
+function Renderer:close()
+    if self.win and vim.api.nvim_win_is_valid(self.win) then
+        vim.api.nvim_win_close(self.win, true)
+    end
+    if self.buf and vim.api.nvim_buf_is_valid(self.buf) then
+        vim.api.nvim_buf_delete(self.buf, { force = true })
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- INPUT HANDLER
+-- ---------------------------------------------------------------------------
+
+local function setup_keymaps(buf, renderer, state, on_submit, config)
+    local function toggle_current()
+        local item = renderer:get_item_at_cursor()
+        if item then
+            state:toggle_option(item.section_id, item.option_id)
+        end
+    end
+
+    local function submit()
+        if config.state_file then
+            local exported = state:export()
+            local ok, err = Persistence.save(config.state_file, exported)
+            if ok then
+                vim.notify("[PluginLoader] Configuration saved!", vim.log.levels.INFO)
+            else
+                vim.notify("[PluginLoader] Save failed: " .. err, vim.log.levels.ERROR)
+            end
+        end
+
+        renderer:close()
+        if on_submit then
+            on_submit(state:get_all_enabled())
+        end
+    end
+
+    local function quit()
+        renderer:close()
+    end
+
+    local opts = { noremap = true, silent = true, buffer = buf }
+    local disable_keys = { "i", "I", "a", "A", "o", "O", "s", "S", "v", "V", "<C-v>", ":" }
+    for _, key in ipairs(disable_keys) do
+        vim.keymap.set("n", key, "<nop>", opts)
+    end
+
+    vim.keymap.set("n", "<CR>", toggle_current, opts)
+    vim.keymap.set("n", "<Space>", toggle_current, opts)
+    vim.keymap.set("n", "q", submit, opts)
+    vim.keymap.set("n", "c", quit, opts)
+    vim.keymap.set("n", "<Esc>", quit, opts)
+end
+
+-- ---------------------------------------------------------------------------
+-- PLUGIN INTEGRATION
+-- ---------------------------------------------------------------------------
+
+local function deep_merge(t1, t2)
+    local result = vim.deepcopy(t1)
+    for k, v in pairs(t2) do
+        if type(v) == "table" and type(result[k]) == "table" then
+            result[k] = deep_merge(result[k], v)
+        else
+            result[k] = v
+        end
+    end
+    return result
+end
+
+function M.populate_lazy_plugins(state)
+    local plugins = {}
+
+    -- Load themes
+    local ok_themes, themes_module = pcall(require, "plugins.themes")
+    if ok_themes then
+        for plugin_name, plugin_config in pairs(themes_module) do
+            local is_enabled = state:is_enabled("themes", plugin_name)
+
+            local merged = deep_merge({}, plugin_config)
+            merged.cond = is_enabled
+            if is_enabled then
+                merged.lazy = false
+                merged.priority = 1000
+            end
+
+            table.insert(plugins, deep_merge({ plugin_name }, merged))
+        end
+    end
+
+    -- Load regular plugins
+    local ok_plugins, plugins_module = pcall(require, "plugins.init")
+    if ok_plugins then
+        for plugin_name, plugin_config in pairs(plugins_module) do
+            local is_enabled = state:is_enabled("plugins", plugin_name)
+
+            local merged = deep_merge({ cond = is_enabled }, plugin_config)
+            table.insert(plugins, deep_merge({ plugin_name }, merged))
+        end
+    end
+
+    return plugins
+end
+
 function M.ensure_lazy_installed()
     local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
     if not (vim.uv or vim.loop).fs_stat(lazypath) then
         local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-        notify("Installing lazy.nvim...", vim.log.levels.INFO)
+        vim.notify("[PluginLoader] Installing lazy.nvim...", vim.log.levels.INFO)
 
         local out = vim.fn.system({
             "git",
@@ -157,330 +526,151 @@ function M.ensure_lazy_installed()
     vim.opt.rtp:prepend(lazypath)
 end
 
---- Load and merge plugin configurations
-function M.populate_plugin_config()
-    local plugins = {}
+-- ---------------------------------------------------------------------------
+-- PUBLIC API
+-- ---------------------------------------------------------------------------
 
-    -- Load themes
-    local ok_themes, themes_module = pcall(require, "plugins.themes")
-    if ok_themes then
-        for plugin_name, plugin_config in pairs(themes_module) do
-            local is_enabled = M.theme_state[plugin_name] or false
-            M.theme_state[plugin_name] = is_enabled
+M._state = nil
+M._config = nil
 
-            local merged = deep_merge({}, plugin_config)
-            merged.cond = is_enabled
-            if is_enabled then
-                merged.lazy = false
-            end
+function M.open_menu(config, on_submit)
+    local initial_state = nil
 
-            table.insert(plugins, deep_merge({ plugin_name }, merged))
+    config = config or M._config
+
+    if config.state_file then
+        local loaded, err = Persistence.load(config.state_file)
+        if loaded then
+            initial_state = loaded
         end
     end
 
-    -- Load regular plugins
+    local state = State.new(config, initial_state)
+    M._state = state
+    M._config = config
+
+    local renderer = Renderer.new(state, config)
+
+    state:on_change(function()
+        renderer:render()
+    end)
+
+    renderer:render()
+    setup_keymaps(renderer.buf, renderer, state, on_submit, config)
+end
+
+function M.is_enabled(section_id, option_id)
+    if not M._state then
+        if M._config and M._config.state_file then
+            local loaded = Persistence.load(M._config.state_file)
+            if loaded and loaded[section_id] then
+                return loaded[section_id][option_id] == true
+            end
+        end
+        return false
+    end
+    return M._state:is_enabled(section_id, option_id)
+end
+
+function M.get_enabled()
+    if not M._state then
+        if M._config and M._config.state_file then
+            return Persistence.load(M._config.state_file) or {}
+        end
+        return {}
+    end
+    return M._state:get_all_enabled()
+end
+
+function M.load_state(config)
+    M._config = config
+    if config.state_file then
+        local loaded = Persistence.load(config.state_file)
+        if loaded then
+            M._state = State.new(config, loaded)
+            return true
+        end
+    end
+    return false
+end
+
+-- ---------------------------------------------------------------------------
+-- INITIALIZATION
+-- ---------------------------------------------------------------------------
+
+function M.build_menu_config(state_file)
+    local plugin_options = {}
+    local theme_options = {}
+
     local ok_plugins, plugins_module = pcall(require, "plugins.init")
     if ok_plugins then
-        for plugin_name, plugin_config in pairs(plugins_module) do
-            local is_enabled = M.plugin_state[plugin_name] or false
-            M.plugin_state[plugin_name] = is_enabled
-
-            local merged = deep_merge({ cond = is_enabled }, plugin_config)
-            table.insert(plugins, deep_merge({ plugin_name }, merged))
+        for plugin_name, _ in pairs(plugins_module) do
+            table.insert(plugin_options, { id = plugin_name, label = plugin_name })
         end
     end
 
-    M.plugins = plugins
-end
+    local ok_themes, themes_module = pcall(require, "plugins.themes")
+    if ok_themes then
+        for theme_name, _ in pairs(themes_module) do
+            table.insert(theme_options, { id = theme_name, label = theme_name })
+        end
+    end
 
---- Initialize lazy.nvim with plugins
-function M.load_plugins_via_lazy()
-    require("lazy").setup(M.plugins, {
-        checker = { enabled = false },
-        custom_keys = {
-            ["<localleader>t"] = false,
+    table.sort(plugin_options, function(a, b)
+        return a.id < b.id
+    end)
+    table.sort(theme_options, function(a, b)
+        return a.id < b.id
+    end)
+
+    return {
+        state_file = state_file,
+        save_mode = "all",
+        sections = {
+            {
+                id = "plugins",
+                title = "Plugins",
+                type = "multiselect",
+                options = plugin_options,
+            },
+            {
+                id = "themes",
+                title = "Themes",
+                type = "singleselect",
+                options = theme_options,
+            },
         },
-    })
+    }
 end
 
--- ============================================================================
--- Persistence
--- ============================================================================
-
---- Load plugin states from disk
-function M.load_persistent_config()
-    local file = io.open(M.plugin_state_file_path, "r")
-
-    if not file then
-        notify("Config file not found, using defaults", vim.log.levels.WARN)
-        return
-    end
-
-    local current_section = ""
-    local state, value = file:read("n"), file:read("l")
-
-    while value do
-        if state == nil then
-            current_section = value
-        else
-            value = trim(value)
-            local is_enabled = state == 1
-
-            if current_section == SECTIONS.state then
-                M.plugin_state[value] = is_enabled
-            elseif current_section == SECTIONS.themes then
-                M.theme_state[value] = is_enabled
-            end
-        end
-
-        state, value = file:read("n"), file:read("l")
-    end
-
-    file:close()
-end
-
---- Save plugin states to disk
-function M.save_persistent_config()
-    local file = io.open(M.plugin_state_file_path, "w")
-
-    if not file then
-        local created_file = io.open(M.plugin_state_file_path, "w")
-        if not created_file then
-            notify("Unable to create config file", vim.log.levels.ERROR)
-            return
-        end
-        created_file:close()
-        return M.save_persistent_config()
-    end
-
-    file:write(SECTIONS.state .. "\n")
-    for _, entry in ipairs(sort_entries(M.plugin_state)) do
-        file:write(entry.state .. " " .. entry.name .. "\n")
-    end
-    file:write("\n")
-
-    file:write(SECTIONS.themes .. "\n")
-    for _, entry in ipairs(sort_entries(M.theme_state)) do
-        file:write(entry.state .. " " .. entry.name .. "\n")
-    end
-    file:write("\n")
-
-    file:close()
-    M.close_menu()
-
-    notify("Configuration saved!")
-end
-
--- ============================================================================
--- Theme Management
--- ============================================================================
-
---- Update theme configuration to set active theme
-function M.update_theme(theme_name)
-    local current_theme = theme_name or vim.g.colors_name or "default"
-
-    for name, _ in pairs(M.theme_state) do
-        M.theme_state[name] = (name == current_theme)
-    end
-end
-
---- Load the active colorscheme
-function M.load_colorscheme()
-    local active_theme = ""
-
-    for theme, state in pairs(M.theme_state) do
-        if state then
-            active_theme = theme
-            break
-        end
-    end
-
-    for i, config in ipairs(M.plugins) do
-        if config[1] and config[1]:match(active_theme .. "$") then
-            M.plugins[i] = deep_merge(config, {
-                cond = true,
-                lazy = false,
-                priority = 1000,
-            })
-        end
-    end
-end
-
--- ============================================================================
--- UI Management
--- ============================================================================
-
---- Create floating window for plugin menu
-function M.create_floating_window()
-    local buf = vim.api.nvim_create_buf(false, true)
-    local width = math.floor(vim.o.columns * 0.6)
-    local height = math.floor(vim.o.lines * 0.8)
-    local col = math.floor((vim.o.columns - width) / 2)
-    local row = math.floor((vim.o.lines - height) / 2)
-
-    local win = vim.api.nvim_open_win(buf, true, {
-        relative = "editor",
-        width = width,
-        height = height,
-        col = col,
-        row = row,
-        style = "minimal",
-        border = "rounded",
-    })
-
-    vim.api.nvim_set_option_value("wrap", false, { win = win })
-    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
-    vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
-
-    local opts = { noremap = true, silent = true, buffer = buf }
-    for _, key in ipairs(KEYMAPS_TO_DISABLE) do
-        vim.keymap.set("n", key, "<nop>", opts)
-    end
-
-    M.buf = buf
-    M.win = win
-end
-
---- Render plugin list in the floating window
-function M.render_plugins()
-    local lines = {}
-
-    local plugin_enabled = 0
-    local plugin_total = 0
-    local theme_total = 0
-
-    local plugin_lines = {}
-    for plugin, state in pairs(M.plugin_state) do
-        plugin_total = plugin_total + 1
-        if state then
-            plugin_enabled = plugin_enabled + 1
-        end
-
-        local icon = state and STATUS_ICONS.enabled or STATUS_ICONS.disabled
-        table.insert(plugin_lines, "\t" .. icon .. " " .. plugin)
-    end
-
-    local theme_lines = {}
-    for theme, state in pairs(M.theme_state) do
-        theme_total = theme_total + 1
-        local icon = state and STATUS_ICONS.enabled or STATUS_ICONS.disabled
-        table.insert(theme_lines, "\t" .. icon .. " " .. theme)
-    end
-
-    table.insert(lines, string.format("(%d/%d) Status:", plugin_enabled, plugin_total))
-    table.sort(plugin_lines, sort_display_lines)
-    vim.list_extend(lines, plugin_lines)
-
-    table.insert(lines, string.format("(%d) Themes:", theme_total))
-    table.sort(theme_lines, sort_display_lines)
-    vim.list_extend(lines, theme_lines)
-
-    vim.api.nvim_set_option_value("modifiable", true, { buf = M.buf })
-    vim.api.nvim_buf_set_lines(M.buf, 0, -1, false, lines)
-    vim.api.nvim_set_option_value("modifiable", false, { buf = M.buf })
-end
-
---- Open the plugin management menu
-function M.open_menu()
-    M.create_floating_window()
-    M.render_plugins()
-
-    local opts = { noremap = true, silent = true, buffer = M.buf }
-    vim.keymap.set("n", "<CR>", function()
-        M.toggle_plugin()
-    end, opts)
-    vim.keymap.set("n", "q", function()
-        M.save_persistent_config()
-    end, opts)
-    vim.keymap.set("n", "c", function()
-        M.close_menu()
-    end, opts)
-    vim.keymap.set("n", "<Esc>", function()
-        M.close_menu()
-    end, opts)
-
-    if M.win and vim.api.nvim_win_is_valid(M.win) then
-        vim.api.nvim_set_current_win(M.win)
-    else
-        notify("Failed to create floating window", vim.log.levels.ERROR)
-    end
-end
-
---- Close the plugin menu
-function M.close_menu()
-    if M.win and vim.api.nvim_win_is_valid(M.win) then
-        vim.api.nvim_win_close(M.win, false)
-    end
-
-    if M.buf and vim.api.nvim_buf_is_valid(M.buf) then
-        vim.api.nvim_buf_delete(M.buf, { force = true })
-    end
-
-    M.win = nil
-    M.buf = nil
-end
-
---- Toggle plugin state on current line
-function M.toggle_plugin()
-    local _, current_line = get_line()
-    current_line = trim(current_line)
-
-    if not (current_line:match("^" .. STATUS_ICONS.enabled) or current_line:match("^" .. STATUS_ICONS.disabled)) then
-        return
-    end
-
-    local plugin_name = current_line:gsub("[" .. STATUS_ICONS.enabled .. STATUS_ICONS.disabled .. "]", "")
-    plugin_name = trim(plugin_name)
-
-    local section_pos, section_line = get_line()
-    while section_pos > 0 do
-        section_pos = section_pos - 1
-        _, section_line = get_line(section_pos)
-
-        if section_line:match(":$") then
-            section_line = trim(section_line):lower()
-            break
-        end
-    end
-
-    if section_line == SECTIONS.state then
-        M.plugin_state[plugin_name] = not M.plugin_state[plugin_name]
-    elseif section_line == SECTIONS.themes then
-        M.update_theme(plugin_name)
-    end
-
-    M.render_plugins()
-end
-
--- ============================================================================
--- Initialization
--- ============================================================================
-
---- Start the plugin loader
 function M.start()
-    M.load_persistent_config()
-    M.populate_plugin_config()
+    local config = M._config
+    if not config then
+        local config_path = vim.fn.stdpath("config") .. "/plugin_state.txt"
+        config = M.build_menu_config(config_path)
+        M._config = config
+    end
+
     M.ensure_lazy_installed()
-    M.load_colorscheme()
-    M.load_plugins_via_lazy()
+    M.load_state(config)
+
+    local plugins = M.populate_lazy_plugins(M._state)
+    require("lazy").setup(plugins, {
+        checker = { enabled = false },
+    })
 end
 
---- Setup function for user configuration
----@param opts? table Optional configuration
 function M.setup(opts)
     opts = opts or {}
 
-    if opts.config_path then
-        M.plugin_state_file_path = opts.config_path
-    end
-
-    if opts.status_icons then
-        STATUS_ICONS.enabled = opts.status_icons.enabled or STATUS_ICONS.enabled
-        STATUS_ICONS.disabled = opts.status_icons.disabled or STATUS_ICONS.disabled
-    end
+    local config_path = opts.config_path or vim.fn.stdpath("config") .. "/plugin_state.txt"
+    local config = M.build_menu_config(config_path)
+    M._config = config
 
     vim.api.nvim_create_user_command("PluginLoader", function()
-        M.open_menu()
+        M.open_menu(config, function(result)
+            vim.notify("[PluginLoader] Restart Neovim to apply changes", vim.log.levels.INFO)
+        end)
     end, { desc = "Open plugin loader menu" })
 end
 
