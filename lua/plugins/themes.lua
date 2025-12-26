@@ -168,4 +168,21 @@ return {
             vim.cmd("colorscheme burzum")
         end,
     },
+
+    ["webhooked/kanso.nvim"] = {
+        -- [Theme] Kanso
+        -- https://github.com/webhooked/kanso.nvim
+        lazy = true,
+        config = function()
+            require("kanso").setup({
+                dimInactive = true,
+                background = {
+                    dark = "ink", -- ink|zen|mist
+                },
+                foreground = "saturated", -- default|saturated
+            })
+
+            vim.cmd("colorscheme kanso")
+        end,
+    },
 }
