@@ -497,30 +497,36 @@ function M.populate_lazy_plugins(state)
 end
 
 function M.ensure_lazy_installed()
+    if pcall(require, "lazy") then
+        return
+    end
+
+    if vim.fn.executable("git") ~= 1 then
+        vim.notify("git not found in PATH; cannot install lazy.nvim", vim.log.levels.ERROR)
+        return
+    end
+
     local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
-    if not (vim.uv or vim.loop).fs_stat(lazypath) then
-        local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-        vim.notify("[PluginLoader] Installing lazy.nvim...", vim.log.levels.INFO)
+    vim.notify("[PluginLoader] Installing lazy.nvim...", vim.log.levels.INFO)
 
-        local out = vim.fn.system({
-            "git",
-            "clone",
-            "--filter=blob:none",
-            "--branch=stable",
-            lazyrepo,
-            lazypath,
-        })
+    local out = vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "--branch=stable",
+        "https://github.com/folke/lazy.nvim.git",
+        lazypath,
+    })
 
-        if vim.v.shell_error ~= 0 then
-            vim.api.nvim_echo({
-                { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-                { out, "WarningMsg" },
-                { "\nPress any key to exit..." },
-            }, true, {})
-            vim.fn.getchar()
-            os.exit(1)
-        end
+    if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+            { out, "WarningMsg" },
+            { "\nPress any key to exit..." },
+        }, true, {})
+        vim.fn.getchar()
+        os.exit(1)
     end
 
     vim.opt.rtp:prepend(lazypath)
