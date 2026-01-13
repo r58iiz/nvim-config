@@ -4,7 +4,8 @@
   - [Structure](#structure)
   - [Plugins](#plugins)
   - [Themes](#themes)
-  - [To Do](#todo)
+  - [Notes](#notes)
+  - [Todo](#todo)
   - [Cool Plugins](#cool-plugins)
 
 ---
@@ -171,7 +172,13 @@ nvim
 
 ---
 
-## Todo:
+## Notes
+
+- [Neovim Tricks](neovim_tricks.md)
+
+---
+
+## Todo
 
 - [ ] Migrate from lsp-zero to inbuilt lsp
 - [x] Remove null-ls related files
@@ -185,8 +192,7 @@ nvim
 - [ ] Proper error handling
 - [ ] Maybe these could be moved to the file themselves?
 - [ ] Actually learn Lua
-- [ ] Implement https://github.com/nvimdev/lspsaga.nvim/blob/d027f8b9c7c55e26cf4030c8657a2fc8222ed762/lua/lspsaga/definition.lua#L196
-
+- [ ] Implement <https://github.com/nvimdev/lspsaga.nvim/blob/d027f8b9c7c55e26cf4030c8657a2fc8222ed762/lua/lspsaga/definition.lua#L196>
 
 ---
 
