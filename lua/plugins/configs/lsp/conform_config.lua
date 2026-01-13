@@ -51,17 +51,22 @@ function M.custom_setup()
             },
             latexindent = {
                 append_args = function(self, ctx)
-                    local latexIndentConfigFile = vim.fs.pathjoin(
-                        os.getenv("HOME") or os.getenv("USERPROFILE"),
+                    local latexIndentConfigFile = vim.fs.joinpath(
+                        vim.env.HOME or vim.env.USERPROFILE,
                         ".config",
                         "latexindent-config",
                         "mysettings.yaml"
                     )
-                    return {
+                    local args = {
                         "-m",
-                        "-l=" .. latexIndentConfigFile,
                         "-g=no?log?file.log",
                     }
+
+                    if vim.uv.fs_stat(latexIndentConfigFile) then
+                        table.insert(args, "-l=" .. latexIndentConfigFile)
+                    end
+
+                    return args
                 end,
             },
         },
