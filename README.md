@@ -6,115 +6,43 @@
   - [Themes](#themes)
   - [Notes](#notes)
   - [Todo](#todo)
-  - [Cool Plugins](#cool-plugins)
 
 ---
 
 ## Structure
 
 ```
-nvim
-│   .editorconfig
-│   .gitattributes
-│   .gitignore
-│   .stylua.toml
-│   init.lua
-│   plugin_state_COPY.txt
-│   README.md
+.
 │
-├───after
-│   └───ftplugin
-│           c.lua
-│           markdown.lua
-│           nix.lua
-│           ts.lua
+├───after/
+│   └───ftplugin/           # Per-filetype settings
 │
-└───lua
-    │   autocmds.lua
-    │   options.lua
-    │   plugin_loader.lua
-    │
-    ├───custom
-    │   │   debugging_helpers.lua
-    │   │
-    │   ├───commands
-    │   │       change_tabsize.lua
-    │   │       format_markdown_table.lua
-    │   │       peek_definition.lua
-    │   │       renumber.lua
-    │   │
-    │   └───lib
-    │       ├───buffer
-    │       │       filetype.lua
-    │       │       tabsize.lua
-    │       │
-    │       ├───lsp
-    │       │       peek_definition.lua
-    │       │
-    │       ├───markdown
-    │       │       table_formatter.lua
-    │       │
-    │       └───renumber
-    │               engine.lua
-    │               rule.lua
-    │
-    ├───keymaps
-    │       buffers.lua
-    │       core.lua
-    │       custom.lua
-    │       files.lua
-    │       git.lua
-    │       helpers.lua
-    │       init.lua
-    │       insert.lua
-    │       lsp.lua
-    │       module_fzf.lua
-    │       plugin_lazy.lua
-    │       plugin_leap.lua
-    │       plugin_outline.lua
-    │       plugin_window.lua
-    │       plugin_zen.lua
-    │       tabs.lua
-    │       terminal.lua
-    │       utils.lua
-    │       visual.lua
-    │
-    └───plugins
-        │   init.lua
-        │   themes.lua
-        │
-        └───configs
-            │   barbar_config.lua
-            │   bufferline_config.lua
-            │   comment_config.lua
-            │   diffview_config.lua
-            │   flash_keys_config.lua
-            │   gitsigns_config.lua
-            │   illuminate_config.lua
-            │   indentblankline_config.lua
-            │   lualine_config.lua
-            │   nvim_ufo_config.lua
-            │   oil_config.lua
-            │   treesitter_config.lua
-            │   twilight_config.lua
-            │   vimtex_config.lua
-            │   whichkey_config.lua
-            │   zenmode_config.lua
-            │
-            ├───lsp
-            │       cmp_config.lua
-            │       conform_config.lua
-            │       diagnostics.lua
-            │       lsp_zero_config.lua
-            │
-            └───themes
-                    astrotheme_config.lua
-                    catppuccin_config.lua
-                    kanagawa_config.lua
-                    material_config.lua
-                    nordic_config.lua
-                    rosepine_config.lua
-                    tokyonight_config.lua
+├───lua/
+│   │   autocmds.lua        # Global autocommands
+│   │   options.lua         # Neovim options
+│   │   plugin_loader.lua   # Custom "plugin loader"
+│   │
+│   ├───custom/             # Custom logic
+│   │   ├───actions/        # Keybinding-driven actions
+│   │   ├───commands/       # Commands
+│   │   └───lib/            # Reusable internal libraries
+│   │       ├───buffer/
+│   │       ├───lsp/
+│   │       ├───markdown/
+│   │       └───renumber/
+│   │
+│   ├───keymaps/            # All keybindings, grouped by domain
+│   │
+│   └───plugins/
+│       │   init.lua        # Plugin list / lazy.nvim specs
+│       │   themes.lua      # Theme plugin definitions
+│       │
+│       └───configs/        # Per-plugin configuration modules
+│           ├───lsp/        # LSP-related plugin configs
+│           └───themes/     # Theme-specific configuration
+├───init.lua                # Neovim entrypoint
+├───plugin_state.json       # Custom plugin state / metadata
+└───README.md
 ```
 
 ---
@@ -174,48 +102,30 @@ nvim
 
 ## Notes
 
-- [Neovim Tricks](neovim_tricks.md)
+- [Neovim Tricks](notes/neovim_tricks.md)
+- [Plugin Candidates](notes/plugin_candidates.md)
 
 ---
 
 ## Todo
 
-- [ ] Migrate from lsp-zero to inbuilt lsp
-- [x] Remove null-ls related files
-- [x] Fix keymap
-- [x] Configure clang-format
-- [x] Get a new formatter
-- [x] Configure lsp-zero properly
-- [ ] Finish README.md
-- [ ] Remove all the ones I don't use
-- [ ] Cleanup and refactor all configs
-- [ ] Proper error handling
-- [ ] Maybe these could be moved to the file themselves?
-- [ ] Actually learn Lua
-- [ ] Implement <https://github.com/nvimdev/lspsaga.nvim/blob/d027f8b9c7c55e26cf4030c8657a2fc8222ed762/lua/lspsaga/definition.lua#L196>
+- Architecture & cleanup
+  - [ ] Audit and remove unused plugins, configs, and keymaps
+  - [ ] Refactor and normalize configuration structure
+  - [ ] Improve error handling across custom modules
 
----
+- LSP & tooling
+  - [ ] Migrate from lsp-zero to native Neovim LSP configuration
+  - [x] Configure clang-format
+  - [x] Configure lsp-zero correctly
+  - [x] Remove null-ls–related files
+  - [x] Switch to a new formatter (Conform)
 
-## Cool Plugins
+- Documentation
+  - [ ] Improve README.md
 
-- [ ] <https://github.com/akinsho/toggleterm.nvim>
-- [ ] <https://github.com/cshuaimin/ssr.nvim/>
-- [ ] <https://github.com/danymat/neogen>
-- [ ] <https://github.com/elihunter173/dirbuf.nvim>
-- [ ] <https://github.com/folke/persistence.nvim>
-- [ ] <https://github.com/gbprod/yanky.nvim>
-- [ ] <https://github.com/iamcco/markdown-preview.nvim>
-- [ ] <https://github.com/karb94/neoscroll.nvim>
-- [ ] <https://github.com/kosayoda/nvim-lightbulb>
-- [ ] <https://github.com/monaqa/dial.nvim>
-- [ ] <https://github.com/mvllow/modes.nvim>
-- [ ] <https://github.com/nvzone/floaterm>
-- [ ] <https://github.com/nvzone/typr>
-- [ ] <https://github.com/rmagatti/goto-preview>
-- [ ] <https://github.com/shellRaining/hlchunk.nvim>
-- [ ] <https://github.com/stefandtw/quickfix-reflector.vim>
-- [ ] <https://github.com/stevearc/overseer.nvim>
-- [ ] <https://github.com/tamago324/lir.nvim>
-- [ ] <https://github.com/ThePrimeagen/refactoring.nvim>
+- Keymaps & UX
+  - [x] Fix keymap
+  - [x] Implement [definition-peek](<https://github.com/nvimdev/lspsaga.nvim/blob/d027f8b9c7c55e26cf4030c8657a2fc8222ed762/lua/lspsaga/definition.lua#L196>) logic inspired by lspsaga
 
 ---
