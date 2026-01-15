@@ -89,8 +89,8 @@ vim.o.undofile = true
 vim.o.swapfile = false
 vim.o.writebackup = false
 vim.o.undoreload = 10000
-vim.o.undodir = HOME .. "/.config/nvim/tmp/undo//"
-vim.o.backupdir = HOME .. "/.config/nvim/tmp/backup//"
+vim.o.undodir = vim.fs.joinpath(vim.fn.stdpath("state"), "tmp", "undo", "/")
+vim.o.backupdir = vim.fs.joinpath(vim.fn.stdpath("state"), "tmp", "backup", "/")
 -- vim.o.directory = HOME .. "/.config/nvim/tmp/swap//"           -- swap files
 
 -- Commands mode
