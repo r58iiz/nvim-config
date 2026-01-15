@@ -28,7 +28,7 @@ local mappings = {
         "n",
         PREFIX .. "t",
         function()
-            require("custom.commands.change_tabsize").prompt()
+            require("custom.actions.change_tabsize").prompt()
         end,
         "Change local tabsize",
     },
@@ -37,7 +37,7 @@ local mappings = {
         "n",
         PREFIX .. "f",
         function()
-            require("custom.commands.format_markdown_table").format()
+            require("custom.actions.format_markdown_table").format()
         end,
         "Format table under cursor",
     },
@@ -49,7 +49,7 @@ local mappings = {
             local start_line = vim.fn.line("v")
             local end_line = vim.fn.line(".")
 
-            require("custom.commands.format_markdown_table").format(start_line, end_line)
+            require("custom.actions.format_markdown_table").format(start_line, end_line)
         end,
         "Format table in selected lines",
     },
@@ -58,7 +58,7 @@ local mappings = {
         "n",
         PREFIX .. "r",
         function()
-            require("custom.commands.renumber").prompt({
+            require("custom.actions.renumber").prompt({
                 first = 1,
                 last = vim.fn.line("$"),
             })
@@ -70,7 +70,7 @@ local mappings = {
         "x",
         PREFIX .. "r",
         function()
-            require("custom.commands.renumber").prompt()
+            require("custom.actions.renumber").prompt()
         end,
         "Custom renumber",
     },
