@@ -10,9 +10,7 @@ local config_files = {
     {
         name = "plugin_loader",
         startup = function(mod)
-            mod["setup"]({
-                config_path = vim.fs.joinpath(vim.fn.stdpath("data"), "plugin_state.json"),
-            })
+            mod["setup"]()
             mod["start"]()
         end,
     },

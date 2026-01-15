@@ -1,6 +1,6 @@
 local M = {}
 
-local RUNTIME_STATE_PATH = vim.fs.joinpath(vim.fn.stdpath("data"), "plugin_state.json")
+local RUNTIME_STATE_PATH = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "plugin_state.json")
 local PROFILE_STATE_PATH = vim.fs.joinpath(vim.fn.stdpath("config"), "plugin_state.json")
 
 -- ---------------------------------------------------------------------------
@@ -583,7 +583,7 @@ function M.ensure_lazy_installed()
         return
     end
 
-    local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+    local lazypath = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "lazy.nvim")
 
     if vim.loop.fs_stat(lazypath) then
         vim.opt.rtp:prepend(lazypath)
@@ -754,6 +754,7 @@ function M.start()
     local plugins = M.populate_lazy_plugins(M._state)
     require("lazy").setup(plugins, {
         checker = { enabled = false },
+        lockfile = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "lazy-lock.json"),
     })
 end
 
@@ -771,7 +772,8 @@ function M.setup(opts)
     end, { desc = "Open plugin loader menu" })
 
     vim.api.nvim_create_user_command("PluginLoaderReset", function()
-        local state_path = resolve_destination(RUNTIME_STATE_PATH, "plugin_state.json")
+        local state_path =
+            resolve_destination(M._config and M._config.state_file or RUNTIME_STATE_PATH, "plugin_state.json")
 
         if vim.fn.filereadable(state_path) ~= 1 then
             vim.notify("[PluginLoader] No runtime state to reset.", vim.log.levels.INFO)
@@ -793,7 +795,7 @@ function M.setup(opts)
     })
 
     vim.api.nvim_create_user_command("PluginLoaderExport", function(opts)
-        local src = RUNTIME_STATE_PATH
+        local src = resolve_destination(M._config and M._config.state_file or RUNTIME_STATE_PATH, "plugin_state.json")
         local dst = resolve_destination(opts.args ~= "" and opts.args or PROFILE_STATE_PATH, "plugin_state.json")
 
         local confirm = vim.fn.confirm(("Export plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
@@ -817,7 +819,7 @@ function M.setup(opts)
 
     vim.api.nvim_create_user_command("PluginLoaderImport", function(opts)
         local src = resolve_destination(opts.args ~= "" and opts.args or PROFILE_STATE_PATH, "plugin_state.json")
-        local dst = resolve_destination(RUNTIME_STATE_PATH, "plugin_state.json")
+        local dst = resolve_destination(M._config and M._config.state_file or RUNTIME_STATE_PATH, "plugin_state.json")
 
         local confirm = vim.fn.confirm(("Import plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
 
