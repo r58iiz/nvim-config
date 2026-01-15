@@ -15,11 +15,12 @@ function M.custom_setup()
     treesitter_install.compilers = { "cc" }
 
     treesitter_config.setup({
-        -- A list of parser names, or "all"
+        parser_install_dir = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "nvim-treesitter-parsers"),
         ensure_installed = {
             "bash",
             "c",
             "cpp",
+            "haskell",
             "html",
             "javascript",
             "lua",
@@ -30,7 +31,6 @@ function M.custom_setup()
             "vim",
             "vimdoc",
         },
-        -- Incremental selection
         incremental_selection = {
             enable = true,
             keymaps = {
@@ -40,12 +40,8 @@ function M.custom_setup()
                 node_decremental = "g<bs>",
             },
         },
-
-        -- Install languages synchronously (only applied to `ensure_installed`)
+        auto_install = true,
         sync_install = false,
-
-        auto_install = false,
-
         highlight = {
             enable = true,
         },
@@ -56,6 +52,8 @@ function M.custom_setup()
             enable = true,
         },
     })
+
+    vim.opt.runtimepath:append(vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "nvim-treesitter-parsers"))
 end
 
 return M
