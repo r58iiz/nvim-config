@@ -1,5 +1,8 @@
 local M = {}
 
+local RUNTIME_STATE_PATH = vim.fs.joinpath(vim.fn.stdpath("data"), "plugin_state.json")
+local PROFILE_STATE_PATH = vim.fs.joinpath(vim.fn.stdpath("config"), "plugin_state.json")
+
 -- ---------------------------------------------------------------------------
 -- UTILS
 -- ---------------------------------------------------------------------------
@@ -71,6 +74,80 @@ local function encode_sorted(value)
     end
 
     error("Unsupported type: " .. t)
+end
+
+local function copy_file(src, dst)
+    if vim.fn.filereadable(src) ~= 1 then
+        return false, "Source file does not exist: " .. src
+    end
+
+    local content = vim.fn.readfile(src)
+    vim.fn.mkdir(vim.fn.fnamemodify(dst, ":h"), "p")
+    vim.fn.writefile(content, dst)
+
+    return true
+end
+
+local function resolve_destination(path, file_name)
+    if vim.fn.isdirectory(path) == 1 then
+        return vim.fs.joinpath(path, file_name)
+    end
+    return path
+end
+
+local function build_header(width, rows, placement)
+    local sep = "│"
+    local deco_sep = ((placement == "bottom") and "┬") or "┴"
+    local margin = 2
+
+    local lk, ld, rk, rd = 0, 0, 0, 0
+    for _, r in ipairs(rows) do
+        lk = math.max(lk, #r[1])
+        ld = math.max(ld, #r[2])
+        rk = math.max(rk, #r[3])
+        rd = math.max(rd, #r[4])
+    end
+
+    local fixed = 5
+    local min_required = lk + ld + rk + rd + fixed + margin * 2
+
+    if width < min_required then
+        return {}
+    end
+
+    local extra = width - min_required
+    local extra_left = math.floor(extra / 2)
+    local e_l_1 = math.floor(extra_left / 2)
+    local e_l_2 = extra_left - e_l_1
+    local extra_right = extra - extra_left
+    local e_r_1 = math.floor(extra_right / 2)
+    local e_r_2 = extra_right - e_r_1
+
+    local lines = {}
+
+    local deco_left = math.floor((width - 1) / 2)
+    local deco_right = width - deco_left - 1
+    table.insert(lines, string.rep("─", deco_left) .. deco_sep .. string.rep("─", deco_right))
+
+    local pad = string.rep(" ", margin)
+
+    for _, r in ipairs(rows) do
+        local left = string.format(
+            "%-" .. (lk + e_l_1) .. "s %-" .. (ld + e_l_2) .. "s",
+            pad .. string.rep(" ", math.floor((lk - #r[1]) / 2)) .. r[1],
+            pad .. r[2]
+        )
+
+        local right = string.format(
+            "%-" .. (rk + e_r_1) .. "s %-" .. (rd + e_r_2) .. "s",
+            pad .. string.rep(" ", math.floor((rk - #r[3]) / 2)) .. r[3],
+            pad .. r[4]
+        )
+
+        table.insert(lines, left .. sep .. right)
+    end
+
+    return lines
 end
 
 -- ---------------------------------------------------------------------------
@@ -183,8 +260,6 @@ function State.new(menu_config, initial_state)
         local selection = {}
         if initial_state and initial_state[section.id] then
             selection = initial_state[section.id]
-        elseif section.default then
-            selection = section.default
         end
 
         self.sections[section.id] = {
@@ -375,11 +450,15 @@ function Renderer:_update_content()
         current_line = current_line + 1
     end
 
-    table.insert(
-        lines,
-        "─────────────────────────────────"
-    )
-    table.insert(lines, "  <Enter> Toggle  <q> Save & Quit  <Esc> Quit")
+    local header_lines = build_header(vim.o.columns * 0.6, {
+        { "<Enter>/<Space>", "Toggle", "r", "Delete config" },
+        { "i", "Import", "e", "Export" },
+        { "q", "Save & Quit", "<Esc>", "Quit w/o saving" },
+    }, "bottom")
+
+    for i = 1, #header_lines, 1 do
+        table.insert(lines, header_lines[i])
+    end
 
     vim.api.nvim_buf_set_option(self.buf, "modifiable", true)
     vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, lines)
@@ -417,9 +496,9 @@ local function setup_keymaps(buf, renderer, state, on_submit, config)
             local exported = state:export()
             local ok, err = Persistence.save(config.state_file, exported)
             if ok then
-                vim.notify("[PluginLoader] Configuration saved!", vim.log.levels.INFO)
+                vim.notify("[PluginLoader] Configuration saved! (" .. config.state_file .. ")", vim.log.levels.INFO)
             else
-                vim.notify("[PluginLoader] Save failed: " .. err, vim.log.levels.ERROR)
+                vim.notify("[PluginLoader] Save failed (" .. config.state_file .. "): " .. err, vim.log.levels.ERROR)
             end
         end
 
@@ -434,7 +513,7 @@ local function setup_keymaps(buf, renderer, state, on_submit, config)
     end
 
     local opts = { noremap = true, silent = true, buffer = buf }
-    local disable_keys = { "i", "I", "a", "A", "o", "O", "s", "S", "v", "V", "<C-v>", ":" }
+    local disable_keys = { "I", "a", "A", "o", "O", "s", "S", "v", "V", "<C-v>", ":" }
     for _, key in ipairs(disable_keys) do
         vim.keymap.set("n", key, "<nop>", opts)
     end
@@ -444,6 +523,9 @@ local function setup_keymaps(buf, renderer, state, on_submit, config)
     vim.keymap.set("n", "q", submit, opts)
     vim.keymap.set("n", "c", quit, opts)
     vim.keymap.set("n", "<Esc>", quit, opts)
+    vim.keymap.set("n", "r", "<Cmd>PluginLoaderReset<CR>", opts)
+    vim.keymap.set("n", "e", "<Cmd>PluginLoaderExport<CR>", opts)
+    vim.keymap.set("n", "i", "<Cmd>PluginLoaderImport<CR>", opts)
 end
 
 -- ---------------------------------------------------------------------------
@@ -501,12 +583,17 @@ function M.ensure_lazy_installed()
         return
     end
 
+    local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+
+    if vim.loop.fs_stat(lazypath) then
+        vim.opt.rtp:prepend(lazypath)
+        return
+    end
+
     if vim.fn.executable("git") ~= 1 then
         vim.notify("git not found in PATH; cannot install lazy.nvim", vim.log.levels.ERROR)
         return
     end
-
-    local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
     vim.notify("[PluginLoader] Installing lazy.nvim...", vim.log.levels.INFO)
 
@@ -590,14 +677,18 @@ end
 
 function M.load_state(config)
     M._config = config
+
+    local loaded = {}
     if config.state_file then
-        local loaded = Persistence.load(config.state_file)
-        if loaded then
-            M._state = State.new(config, loaded)
-            return true
+        local persisted = Persistence.load(config.state_file)
+        if persisted then
+            loaded = persisted
         end
     end
-    return false
+
+    M._state = State.new(config, loaded)
+
+    return true
 end
 
 -- ---------------------------------------------------------------------------
@@ -652,7 +743,7 @@ end
 function M.start()
     local config = M._config
     if not config then
-        local config_path = vim.fn.stdpath("config") .. "/plugin_state.txt"
+        local config_path = RUNTIME_STATE_PATH
         config = M.build_menu_config(config_path)
         M._config = config
     end
@@ -669,7 +760,7 @@ end
 function M.setup(opts)
     opts = opts or {}
 
-    local config_path = opts.config_path or vim.fn.stdpath("config") .. "/plugin_state.txt"
+    local config_path = opts.config_path or RUNTIME_STATE_PATH
     local config = M.build_menu_config(config_path)
     M._config = config
 
@@ -678,6 +769,74 @@ function M.setup(opts)
             vim.notify("[PluginLoader] Restart Neovim to apply changes", vim.log.levels.INFO)
         end)
     end, { desc = "Open plugin loader menu" })
+
+    vim.api.nvim_create_user_command("PluginLoaderReset", function()
+        local state_path = resolve_destination(RUNTIME_STATE_PATH, "plugin_state.json")
+
+        if vim.fn.filereadable(state_path) ~= 1 then
+            vim.notify("[PluginLoader] No runtime state to reset.", vim.log.levels.INFO)
+            return
+        end
+
+        local confirm =
+            vim.fn.confirm(("Reset plugin loader state?\n\nThis will delete:\n%s\n"):format(state_path), "&Yes\n&No", 2)
+
+        if confirm ~= 1 then
+            return
+        end
+
+        vim.fn.delete(state_path)
+
+        vim.notify("[PluginLoader] Runtime plugin state cleared. Restart Neovim.", vim.log.levels.WARN)
+    end, {
+        desc = "Delete local plugin loader runtime state",
+    })
+
+    vim.api.nvim_create_user_command("PluginLoaderExport", function(opts)
+        local src = RUNTIME_STATE_PATH
+        local dst = resolve_destination(opts.args ~= "" and opts.args or PROFILE_STATE_PATH, "plugin_state.json")
+
+        local confirm = vim.fn.confirm(("Export plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
+
+        if confirm ~= 1 then
+            return
+        end
+
+        local ok, err = copy_file(src, dst)
+        if not ok then
+            vim.notify("[PluginLoader] Export failed: " .. err, vim.log.levels.ERROR)
+            return
+        end
+
+        vim.notify("[PluginLoader] Exported plugin state:\n" .. dst, vim.log.levels.INFO)
+    end, {
+        desc = "Export plugin loader state (data → config or path)",
+        nargs = "?",
+        complete = "file",
+    })
+
+    vim.api.nvim_create_user_command("PluginLoaderImport", function(opts)
+        local src = resolve_destination(opts.args ~= "" and opts.args or PROFILE_STATE_PATH, "plugin_state.json")
+        local dst = resolve_destination(RUNTIME_STATE_PATH, "plugin_state.json")
+
+        local confirm = vim.fn.confirm(("Import plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
+
+        if confirm ~= 1 then
+            return
+        end
+
+        local ok, err = copy_file(src, dst)
+        if not ok then
+            vim.notify("[PluginLoader] Import failed: " .. err, vim.log.levels.ERROR)
+            return
+        end
+
+        vim.notify("[PluginLoader] Imported plugin state. Restart Neovim.", vim.log.levels.WARN)
+    end, {
+        desc = "Import plugin loader state (config/path → data)",
+        nargs = "?",
+        complete = "file",
+    })
 end
 
 return M
