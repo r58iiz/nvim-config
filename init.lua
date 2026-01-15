@@ -17,6 +17,7 @@ local config_files = {
         end,
     },
     { name = "keymaps" },
+    { name = "custom.commands" },
 }
 
 for _, entry in ipairs(config_files) do
