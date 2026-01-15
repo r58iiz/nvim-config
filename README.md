@@ -1,11 +1,136 @@
 # Nvim Config
 
+My (opinionated) neovim configuration. Runs on NixOS, Windows and Linux.
+
+---
+
 - [Nvim Config](#nvim-config)
+  - [Requirements](#requirements)
+    - [Windows](#windows)
+    - [Linux (Mutable FS)](#linux-mutable-fs)
+    - [NixOS](#nixos)
+  - [Notes](#notes)
+    - [Mason + uv](#mason--uv)
+      - [Reverting to `python3`](#reverting-to-python3)
   - [Structure](#structure)
   - [Plugins](#plugins)
   - [Themes](#themes)
-  - [Notes](#notes)
-  - [Todo](#todo)
+  - [To-Do](#to-do)
+
+---
+
+## Requirements
+
+Some language servers, Treesitter parsers, and formatters require a native toolchain at runtime or during installation. Language servers and formatters can be installed manually or via Mason.
+
+### Windows
+
+- **System utilities**
+  - `git`
+  - `curl` *(or `wget`)*
+  - `tar`
+  - `gzip`
+  - `unzip`
+
+- **Toolchains**
+  - Any C compiler (MSVC / LLVM / GCC etc)
+  - `cmake`
+
+- **Treesitter**
+  - `tree-sitter` (cli)
+
+- **Mason installers**
+  - `node`
+  - `python`
+  - `go` / `cargo` etc if required
+
+### Linux (Mutable FS)
+
+- **System utilities**
+  - `git`
+  - `curl` or `wget`
+  - `unzip`
+  - `tar`
+  - `gzip`
+
+- **Toolchains**
+  - Any C compiler (CLANG/GCC etc)
+  - `cmake`
+  - `make`
+  - `pkg-config`
+
+- **Treesitter**
+  - `tree-sitter` (cli)
+
+- **Mason installers**
+  - `node`
+  - `python3` *(or `uv` with `KingMichaelPark/mason.nvim` @ `b0827eb6cee026d0ed2fabab081296705a92240e`)*
+  - `go` / `cargo` etc if required
+
+### NixOS
+
+- **Plugins (via Nix)**
+  - `pkgs.vimPlugins.lazy-nvim`
+  - `pkgs.vimPlugins.nvim-treesitter.withAllGrammars`
+
+- **Treesitter**
+  - `pkgs.tree-sitter` (cli)
+
+- **Toolchains**
+  - `pkgs.gcc` *(or clang)*
+  - `pkgs.cmake`
+  - `pkgs.gnumake`
+  - `pkgs.pkg-config`
+
+- **Mason**
+  - `pkgs.git`
+  - `pkgs.curl` or `pkgs.wget`
+  - `pkgs.unzip`
+  - `pkgs.gnutar`
+  - `pkgs.gzip`
+  - **Installers**
+    - `pkgs.nodejs`
+    - `pkgs.python3` *(or `pkgs.uv` `KingMichaelPark/mason.nvim` @ `b0827eb6cee026d0ed2fabab081296705a92240e`)*
+    - `pkgs.go` / `pkgs.cargo` etc if required
+
+---
+
+## Notes
+
+- [Neovim Tricks](notes/neovim_tricks.md)
+- [Plugin Candidates](notes/plugin_candidates.md)
+
+### Mason + uv
+
+This configuration uses `uv` instead of `python3` for Mason installers when
+running `KingMichaelPark/mason.nvim` at commit
+`b0827eb6cee026d0ed2fabab081296705a92240e`.
+
+This behavior is not supported by upstream Mason and may break on update.
+
+#### Reverting to `python3`
+
+1. Replace `KingMichaelPark/mason.nvim` with `williamboman/mason.nvim` and remove the pinned `commit` in [lua/plugins/init.lua#L260-L266](<https://github.com/r58iiz/nvim-config/blob/ff2d8642b3c4463f7118f2a903bb881a12f47055/lua/plugins/init.lua#L260-L266>)
+
+```diff
+            {
+                -- [LSP] Mason.nvim
+                -- https://github.com/williamboman/mason.nvim
++               "williamboman/mason.nvim",
+-               "KingMichaelPark/mason.nvim",
+-                commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
+                lazy = true,
+            },
+```
+
+2. Remove the `use_uv` key from [lua/plugins/configs/lsp/lsp_zero_config.lua#L103-L106](<https://github.com/r58iiz/nvim-config/blob/ff2d8642b3c4463f7118f2a903bb881a12f47055/lua/plugins/configs/lsp/lsp_zero_config.lua#L103-L106>)
+
+```diff
+        pip = {
+            upgrade_pip = true,
+-           use_uv = true,
+        },
+```
 
 ---
 
@@ -100,19 +225,13 @@
 
 ---
 
-## Notes
-
-- [Neovim Tricks](notes/neovim_tricks.md)
-- [Plugin Candidates](notes/plugin_candidates.md)
-
----
-
-## Todo
+## To-Do
 
 - Architecture & cleanup
   - [ ] Audit and remove unused plugins, configs, and keymaps
   - [ ] Refactor and normalize configuration structure
   - [ ] Improve error handling across custom modules
+  - [ ] Rewrite [plugin_loader.lua](lua/plugin_loader.lua)
 
 - LSP & tooling
   - [ ] Migrate from lsp-zero to native Neovim LSP configuration
