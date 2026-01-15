@@ -6,7 +6,6 @@
 .env.*
 
 .luarc.json
-plugin_state.json
 lazy-lock.json
 
 spell/*
