@@ -71,7 +71,7 @@ return {
         -- https://github.com/morhetz/gruvbox
         lazy = true,
         config = function()
-            vim.cmd("let g:gruvbox_italic=1")
+            vim.g.gruvbox_italic = 1
             vim.cmd("colorscheme gruvbox")
         end,
     },
@@ -187,10 +187,46 @@ return {
     },
 
     ["vague-theme/vague.nvim"] = {
+        -- [Theme] Vague
+        -- https://github.com/vague-theme/vague.nvim
         lazy = true,
         config = function()
             require("vague").setup({})
             vim.cmd("colorscheme vague")
+        end,
+    },
+
+    ["sainnhe/gruvbox-material"] = {
+        -- [Theme] Gruvbox-material
+        -- https://github.com/sainnhe/gruvbox-material
+        lazy = true,
+        config = function()
+            vim.g.gruvbox_material_background = "soft"
+            vim.g.gruvbox_material_better_performance = 1
+            vim.g.gruvbox_material_dim_inactive_windows = 1
+            vim.g.gruvbox_material_enable_bold = 1
+            vim.g.gruvbox_material_enable_italic = 1
+            vim.g.gruvbox_material_foreground = "mix"
+
+            vim.cmd("colorscheme gruvbox-material")
+        end,
+    },
+
+    ["projekt0n/github-nvim-theme"] = {
+        -- [Theme] Github-nvim-theme
+        -- https://github.com/projekt0n/github-nvim-theme
+        lazy = true,
+        config = function()
+            vim.cmd("colorscheme github_dark_default")
+        end,
+    },
+
+    ["dasupradyumna/midnight.nvim"] = {
+        -- [Theme] Midnight
+        -- https://github.com/dasupradyumna/midnight.nvim
+        lazy = true,
+        config = function()
+            vim.cmd("colorscheme midnight")
         end,
     },
 }
