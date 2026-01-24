@@ -74,6 +74,33 @@ local mappings = {
         end,
         "Custom renumber",
     },
+
+    {
+        "n",
+        PREFIX .. "zz",
+        function()
+            require("custom.actions.center_cursor").toggle({ mode = "both" })
+        end,
+        "Toggle center cursor (Both)",
+    },
+
+    {
+        "n",
+        PREFIX .. "zi",
+        function()
+            require("custom.actions.center_cursor").toggle({ mode = "insert" })
+        end,
+        "Toggle center cursor (Ins)",
+    },
+
+    {
+        "n",
+        PREFIX .. "zn",
+        function()
+            require("custom.actions.center_cursor").toggle({ mode = "normal" })
+        end,
+        "Toggle center cursor (Norm)",
+    },
 }
 
 map(mappings)
