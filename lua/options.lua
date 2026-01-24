@@ -6,6 +6,12 @@ vim.g.loaded_netrwPlugin = 1
 -- optionally enable 24-bit colour
 vim.opt.termguicolors = true
 
+-- disable providers
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+
 -- set shell
 if vim.loop.os_uname().sysname == "Windows_NT" then
     vim.opt.shell = "powershell"
@@ -20,7 +26,6 @@ end
 vim.lsp.set_log_level("OFF")
 
 -- basic settings
-vim.o.encoding = "utf-8"
 vim.o.backspace = "indent,eol,start"
 vim.o.history = 1000
 vim.opt.timeoutlen = 500
@@ -38,31 +43,29 @@ vim.o.scrolloff = 5
 vim.o.synmaxcol = 300
 vim.o.laststatus = 2
 
-vim.o.foldenable = true
-vim.o.foldlevel = 0
-vim.o.foldcolumn = "0"
-vim.o.foldmethod = "expr"
-vim.o.foldexpr = "nvim_treesitter#foldexpr()"
+vim.wo.foldenable = true
+vim.wo.foldlevel = 0
+vim.wo.foldcolumn = "0"
 
-vim.o.wrap = true
+vim.wo.wrap = true
 vim.o.eol = true
-vim.o.cursorline = true
+vim.wo.cursorline = true
 vim.o.list = false
 
 -- custom
 local tabsNumber = 4
-vim.o.softtabstop = tabsNumber
-vim.o.textwidth = 120
+vim.bo.softtabstop = tabsNumber
+vim.bo.textwidth = 120
 vim.o.smarttab = true
 vim.o.showmode = true
-vim.o.colorcolumn = [[120]]
+vim.wo.colorcolumn = [[120]]
 vim.o.completeopt = [[menuone,noinsert,noselect]]
 
 -- Sidebar
-vim.o.number = true
-vim.o.relativenumber = true
-vim.o.numberwidth = 3
-vim.o.signcolumn = "yes"
+vim.wo.number = true
+vim.wo.relativenumber = true
+vim.wo.numberwidth = 3
+vim.wo.signcolumn = "yes"
 vim.o.modelines = 0
 vim.o.showcmd = true
 
@@ -75,13 +78,13 @@ vim.o.matchtime = 2
 vim.o.mps = vim.o.mps .. ",<:>"
 
 -- White characters
-vim.o.autoindent = true
-vim.o.smartindent = true
-vim.o.tabstop = tabsNumber
-vim.o.shiftwidth = tabsNumber
-vim.o.formatoptions = "qnj1"
+vim.bo.autoindent = true
+vim.bo.smartindent = true
+vim.bo.tabstop = tabsNumber
+vim.bo.shiftwidth = tabsNumber
+vim.bo.formatoptions = "qnj1"
 -- q  - comment formatting; n - numbered lists; j - remove comment when joining lines; 1 - don't break after one-letter word
-vim.o.expandtab = true
+vim.bo.expandtab = true
 
 -- Backup files
 vim.o.backup = true
