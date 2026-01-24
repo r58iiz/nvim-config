@@ -53,3 +53,19 @@ vim.api.nvim_create_autocmd("TermOpen", {
         vim.opt_local.relativenumber = false
     end,
 })
+
+-- =========================
+-- Treesitter
+-- =========================
+
+vim.api.nvim_create_autocmd("FileType", {
+    callback = function()
+        if vim.bo.buftype == "" then
+            local status_ok, err = pcall(vim.treesitter.start)
+            if status_ok then
+                vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+                vim.wo.foldmethod = "expr"
+            end
+        end
+    end,
+})
