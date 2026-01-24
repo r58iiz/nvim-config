@@ -1,26 +1,5 @@
 local M = {}
 
---[[
-Current installed:
-LSP:
-    ✓ clangd
-    ✓ eslint-lsp eslint
-    ✓ lua-language-server lua_ls
-    ✓ pyright
-    ✓ python-lsp-server pylsp
-    ✓ rust-analyzer rust_analyzer
-    ✓ typescript-language-server tsserver
-Linter:
-    ✓ eslint_d
-Formatter:
-    ✓ autopep8
-    ✓ clang-format
-    ✓ latexindent
-    ✓ prettier
-    ✓ prettierd
-    ✓ stylua
-]]
-
 function M.custom_setup()
     local status_ok, lsp_zero = pcall(require, "lsp-zero")
     if not status_ok then
@@ -37,12 +16,6 @@ function M.custom_setup()
     local status_ok, mason_lspconfig = pcall(require, "mason-lspconfig")
     if not status_ok then
         error("[Plugins][lsp-zero-config] Unable to load `mason-lspconfig`.")
-        return
-    end
-
-    local status_ok, lsp_config = pcall(require, "lspconfig")
-    if not status_ok then
-        error("[Plugins][lsp-zero-config] Unable to load `lspconfig`.")
         return
     end
 
@@ -111,105 +84,7 @@ function M.custom_setup()
 
     -- Mason LSP Config
     mason_lspconfig.setup({
-        -- ensure_installed = {},
-        automatic_installation = true,
-        handlers = {
-            lsp_zero.default_setup,
-            rust_analyzer = function()
-                lsp_config.rust_analyzer.setup({
-                    cmd = { "rust-analyzer" },
-                    settings = {
-                        ["rust-analyzer"] = {
-                            diagnostics = {
-                                enable = false,
-                            },
-                        },
-                    },
-                })
-            end,
-            clangd = function()
-                lsp_config.clangd.setup({
-                    cmd = {
-                        "clangd",
-                        -- "--inlay-hints",
-                        -- "--enable-config",
-                        -- "--header-insertion-decorators",
-                        "--header-insertion=never",
-                        "--completion-style=detailed",
-                        -- "--function-arg-placeholders",
-                    },
-                    settings = {
-                        completions = {
-                            completeFunctionCalls = true,
-                        },
-                    },
-                    init_options = {
-                        fallbackFlags = {
-                            -- "-std=c99",
-                            -- "-xc",
-                            -- "-Wall",
-                            -- "-Werror",
-                            -- "-Wextra",
-                            -- "-pedantic",
-                            -- "-Wshadow",
-                            -- "-Wundef",
-                            -- "-Wconversion",
-                            -- "-Wpointer-arith",
-                            -- "-Wcast-align",
-                            -- "-Wbad-function-cast",
-                            -- "-Wstrict-prototypes",
-                            -- "-Wswitch-default",
-                            -- "-Wswitch-enum",
-                        },
-                    },
-                })
-            end,
-            pylsp = function()
-                lsp_config.pylsp.setup({
-                    settings = {
-                        pylsp = {
-                            --[[
-                            plugins = {
-								pycodestyle = {
-									maxLineLength = 100,
-								},
-							},
-                            --]]
-                        },
-                    },
-                })
-            end,
-            pyright = function()
-                lsp_config.pyright.setup({
-                    --[[
-					settings = {
-						completions = {
-							completeFunctionCalls = true,
-						},
-					},
-                    --]]
-                })
-            end,
-            eslint = function()
-                lsp_config.eslint.setup({
-                    workingDirectory = { mode = "auto" },
-                    settings = {
-                        completions = {
-                            completeFunctionCalls = true,
-                        },
-                    },
-                })
-            end,
-            ts_ls = function()
-                lsp_config.ts_ls.setup({
-                    settings = {
-                        completions = {
-                            completeFunctionCalls = true,
-                        },
-                    },
-                })
-            end,
-        },
+        automatic_enable = true,
     })
 end
 
