@@ -755,6 +755,7 @@ function M.start()
     require("lazy").setup(plugins, {
         checker = { enabled = false },
         lockfile = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "lazy-lock.json"),
+        rocks = { enabled = false },
     })
 end
 
