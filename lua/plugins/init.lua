@@ -176,6 +176,7 @@ return {
     ["ggandor/leap.nvim"] = {
         -- [Jumping] Leap
         -- https://github.com/ggandor/leap.nvim
+        url = "https://codeberg.org/andyg/leap.nvim",
         event = "BufReadPost",
         lazy = true,
     },
