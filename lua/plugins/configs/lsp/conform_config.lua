@@ -14,11 +14,13 @@ function M.custom_setup()
         formatters_by_ft = {
             c = { "clang_format" },
             cpp = { "clang_format" },
+            java = { "clang_format" },
             javascript = { "biome-check" },
             json = { "biome-check" },
             lua = { "stylua" },
             python = { "autopep8", "black" },
             rust = { "rustfmt" },
+            sh = { "shellharden", "shfmt" },
             tex = { "latexindent" },
             toml = { "taplo" },
             typescript = { "biome-check" },
