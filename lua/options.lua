@@ -43,29 +43,30 @@ vim.o.scrolloff = 5
 vim.o.synmaxcol = 300
 vim.o.laststatus = 2
 
-vim.wo.foldenable = true
-vim.wo.foldlevel = 0
-vim.wo.foldcolumn = "0"
+vim.o.foldenable = true
+vim.o.foldlevel = 0
+vim.o.foldcolumn = "0"
 
-vim.wo.wrap = true
+vim.o.wrap = true
 vim.o.eol = true
-vim.wo.cursorline = true
+vim.o.cursorline = true
 vim.o.list = false
+vim.o.linebreak = true
 
 -- custom
 local tabsNumber = 4
-vim.bo.softtabstop = tabsNumber
-vim.bo.textwidth = 120
+vim.o.softtabstop = tabsNumber
+vim.o.textwidth = 120
 vim.o.smarttab = true
 vim.o.showmode = true
-vim.wo.colorcolumn = [[120]]
+vim.o.colorcolumn = [[120]]
 vim.o.completeopt = [[menuone,noinsert,noselect]]
 
 -- Sidebar
-vim.wo.number = true
-vim.wo.relativenumber = true
-vim.wo.numberwidth = 3
-vim.wo.signcolumn = "yes"
+vim.o.number = true
+vim.o.relativenumber = true
+vim.o.numberwidth = 3
+vim.o.signcolumn = "yes"
 vim.o.modelines = 0
 vim.o.showcmd = true
 
@@ -78,11 +79,11 @@ vim.o.matchtime = 2
 vim.o.mps = vim.o.mps .. ",<:>"
 
 -- White characters
-vim.bo.autoindent = true
-vim.bo.smartindent = true
-vim.bo.tabstop = tabsNumber
-vim.bo.shiftwidth = tabsNumber
-vim.bo.formatoptions = "qnj1"
+vim.o.autoindent = true
+vim.o.smartindent = true
+vim.o.tabstop = tabsNumber
+vim.o.shiftwidth = tabsNumber
+vim.opt.formatoptions = "qnj1"
 -- q  - comment formatting; n - numbered lists; j - remove comment when joining lines; 1 - don't break after one-letter word
 vim.bo.expandtab = true
 
