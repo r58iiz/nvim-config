@@ -44,6 +44,12 @@ return {
         end,
     },
 
+    ["MeanderingProgrammer/render-markdown.nvim"] = {
+        -- [QoL] render-markdown.nvim
+        -- https://github.com/MeanderingProgrammer/render-markdown.nvim
+        opts = {},
+    },
+
     ["stevearc/conform.nvim"] = {
         -- [Formatting] Conform
         -- https://github.com/stevearc/conform.nvim
