@@ -23,7 +23,7 @@ if vim.loop.os_uname().sysname == "Windows_NT" then
 end
 
 -- Disable LSP logging
-vim.lsp.set_log_level("OFF")
+vim.lsp.log.set_level("OFF")
 
 -- basic settings
 vim.o.backspace = "indent,eol,start"

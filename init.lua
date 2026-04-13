@@ -16,6 +16,7 @@ local config_files = {
     },
     { name = "keymaps" },
     { name = "custom.commands" },
+    { name = "vimpack" },
 }
 
 for _, entry in ipairs(config_files) do
