@@ -1,5 +1,9 @@
 # Plugin Candidates
 
+## Security & Isolation
+
+- [ ] [esensar/nvim-dev-container](https://github.com/esensar/nvim-dev-container)
+
 ## Terminal & Execution
 
 - [ ] [akinsho/toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim)
