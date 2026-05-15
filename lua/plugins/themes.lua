@@ -1,4 +1,16 @@
 return {
+    ["vimspectr-dark"] = {
+        -- [Theme] vimspectr
+        -- https://github.com/haystackandroid/vimspectr
+        dir = vim.fs.joinpath(vim.fn.stdpath("config"), "lua", "plugins", "themes", "vimspectr-dark"),
+        lazy = true,
+        config = function()
+            vim.g.vimspectr_hue = "grey"
+            vim.g.vimspectrItalicComment = true
+            vim.cmd("colorscheme vimspectr-dark")
+        end,
+    },
+
     ["marko-cerovac/material.nvim"] = {
         -- [Theme] material
         -- https://github.com/marko-cerovac/material.nvim
