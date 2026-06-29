@@ -1,105 +1,138 @@
 local Formatter = {}
 
-local function map(tbl, f)
+local function split_plain(str, sep)
     local out = {}
-    for i, v in ipairs(tbl) do
-        out[i] = f(v, i)
+    local sep_len = #sep
+    local start = 1
+    while true do
+        local i = str:find(sep, start, true)
+        if not i then
+            out[#out + 1] = str:sub(start)
+            break
+        end
+        out[#out + 1] = str:sub(start, i - 1)
+        start = i + sep_len
     end
     return out
 end
 
-local function slice(tbl, first, last)
-    local out = {}
-    for i = first or 1, last or #tbl do
-        out[#out + 1] = tbl[i]
-    end
-    return out
+local function trim(s)
+    return s:match("^%s*(.-)%s*$")
 end
 
-function Formatter.parse(table_string)
-    local rows = {}
+local function import_table(table_string)
+    local rows_raw = split_plain(table_string, "\n")
 
-    for line in table_string:gmatch("[^\r\n]+") do
-        if line:find("|") then
+    while #rows_raw > 0 and not rows_raw[1]:find("|", 1, true) do
+        table.remove(rows_raw, 1)
+    end
+
+    local cells = {}
+
+    for row_i, raw_line in ipairs(rows_raw) do
+        if not raw_line:find("|", 1, true) then
+            -- skip
+        else
             local row = {}
-            for cell in line:gmatch("[^|]+") do
-                row[#row + 1] = vim.trim(cell)
+            local cols = split_plain(raw_line, "|")
+            for _, cell in ipairs(cols) do
+                local c = trim(cell)
+                if row_i == 2 then
+                    c = c:match("^%-+$") and "-" or c
+                end
+                row[#row + 1] = c
             end
-            rows[#rows + 1] = row
+            cells[#cells + 1] = row
         end
     end
 
-    return rows
+    return cells
 end
 
-function Formatter.trim_empty_columns(cells)
-    while cells[1][1] == "" do
-        for _, row in ipairs(cells) do
-            table.remove(row, 1)
-        end
-    end
-
-    while cells[1][#cells[1]] == "" do
-        for _, row in ipairs(cells) do
-            table.remove(row, #row)
-        end
-    end
-end
-
-function Formatter.column_widths(cells)
+local function get_column_widths(cells)
     local widths = {}
-
-    for col = 1, #cells[1] do
-        local max_width = 0
-        for row = 1, #cells do
-            if row ~= 2 then
-                max_width = math.max(max_width, #(cells[row][col] or ""))
+    for _, row in ipairs(cells) do
+        for col_i, cell in ipairs(row) do
+            local w = #cell
+            if not widths[col_i] or widths[col_i] < w then
+                widths[col_i] = w
             end
         end
-        widths[col] = max_width
     end
-
     return widths
 end
 
-function Formatter.normalize_cells(cells, widths)
-    return map(cells, function(row, row_i)
-        return map(row, function(cell, col_i)
-            if row_i == 2 then
-                return string.rep("-", widths[col_i])
+local function strip_empty_edge_columns(cells)
+    local widths = get_column_widths(cells)
+
+    if widths[1] == 0 then
+        for _, row in ipairs(cells) do
+            table.remove(row, 1)
+        end
+        widths = get_column_widths(cells)
+    end
+
+    local last = #widths
+    if last > 0 and widths[last] == 0 then
+        for _, row in ipairs(cells) do
+            if #row == last then
+                table.remove(row, last)
             end
-            return cell .. string.rep(" ", widths[col_i] - #cell)
-        end)
-    end)
+        end
+    end
 end
 
-function Formatter.render(cells)
-    local header = "| " .. table.concat(cells[1], " | ") .. " |"
-    local separator = "|-" .. table.concat(cells[2], "-|-") .. "-|"
+local function add_missing_cells(cells, num_cols)
+    for _, row in ipairs(cells) do
+        for col_i = #row + 1, num_cols do
+            row[col_i] = ""
+        end
+    end
+end
 
-    local body = slice(cells, 3)
-    body = map(body, function(row)
-        return "| " .. table.concat(row, " | ") .. " |"
-    end)
+local function pad_cells(cells, widths)
+    for row_i, row in ipairs(cells) do
+        for col_i, cell in ipairs(row) do
+            local target = widths[col_i] or 0
+            local pad_char = (row_i == 2) and "-" or " "
+            while #row[col_i] < target do
+                row[col_i] = row[col_i] .. pad_char
+            end
+            _ = cell -- suppress unused
+        end
+    end
+end
 
-    return table.concat({
-        header,
-        separator,
-        table.concat(body, "\n"),
-    }, "\n")
+local function render(cells)
+    local lines = {}
+
+    lines[#lines + 1] = "| " .. table.concat(cells[1], " | ") .. " |"
+
+    lines[#lines + 1] = "|-" .. table.concat(cells[2], "-|-") .. "-|"
+
+    for row_i = 3, #cells do
+        lines[#lines + 1] = "| " .. table.concat(cells[row_i], " | ") .. " |"
+    end
+
+    return table.concat(lines, "\n")
 end
 
 function Formatter.format(table_string)
-    local cells = Formatter.parse(table_string)
+    local cells = import_table(table_string)
+
     if #cells < 2 then
         return table_string
     end
 
-    Formatter.trim_empty_columns(cells)
-    local widths = Formatter.column_widths(cells)
-    cells = Formatter.normalize_cells(cells, widths)
+    strip_empty_edge_columns(cells)
 
-    return Formatter.render(cells)
+    local widths = get_column_widths(cells)
+    local num_cols = #widths
+
+    add_missing_cells(cells, num_cols)
+    pad_cells(cells, widths)
+
+    return render(cells)
 end
 
 return Formatter
