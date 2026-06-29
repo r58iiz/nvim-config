@@ -11,7 +11,7 @@ function Rule.new(spec)
     self.name = spec.name
     self.pattern = spec.pattern
     self.pad = spec.pad or 0
-    self.is_vim_regex = spec.is_vim_regex or false
+    self.is_vim_regex = spec.is_vim_regex ~= false -- default true
 
     if self.is_vim_regex then
         self.regex = vim.regex(self.pattern)
@@ -27,6 +27,7 @@ function Rule:line_has_match(line)
     return line:find(self.pattern) ~= nil
 end
 
+-- Returns number (or nil), byte-start (1-based), byte-end (1-based, inclusive)
 function Rule:find_first_number(line)
     if self.regex then
         local s, e = self.regex:match_str(line)

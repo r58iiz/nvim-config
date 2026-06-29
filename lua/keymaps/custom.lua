@@ -58,21 +58,21 @@ local mappings = {
         "n",
         PREFIX .. "r",
         function()
-            require("custom.actions.renumber").prompt({
+            require("custom.actions.renumber").form({
                 first = 1,
                 last = vim.fn.line("$"),
             })
         end,
-        "Custom renumber",
+        "Renumber (whole file)",
     },
 
     {
         "x",
         PREFIX .. "r",
         function()
-            require("custom.actions.renumber").prompt()
+            require("custom.actions.renumber").form()
         end,
-        "Custom renumber",
+        "Renumber (selection)",
     },
 
     {
