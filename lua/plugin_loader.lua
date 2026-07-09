@@ -799,10 +799,12 @@ function M.setup(opts)
         local src = resolve_destination(M._config and M._config.state_file or RUNTIME_STATE_PATH, "plugin_state.json")
         local dst = resolve_destination(opts.args ~= "" and opts.args or PROFILE_STATE_PATH, "plugin_state.json")
 
-        local confirm = vim.fn.confirm(("Export plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
+        if not opts.bang then
+            local confirm = vim.fn.confirm(("Export plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
 
-        if confirm ~= 1 then
-            return
+            if confirm ~= 1 then
+                return
+            end
         end
 
         local ok, err = copy_file(src, dst)
@@ -816,16 +818,19 @@ function M.setup(opts)
         desc = "Export plugin loader state (data → config or path)",
         nargs = "?",
         complete = "file",
+        bang = true,
     })
 
     vim.api.nvim_create_user_command("PluginLoaderImport", function(opts)
         local src = resolve_destination(opts.args ~= "" and opts.args or PROFILE_STATE_PATH, "plugin_state.json")
         local dst = resolve_destination(M._config and M._config.state_file or RUNTIME_STATE_PATH, "plugin_state.json")
 
-        local confirm = vim.fn.confirm(("Import plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
+        if not opts.bang then
+            local confirm = vim.fn.confirm(("Import plugin state?\n\n%s -> %s\n"):format(src, dst), "&Yes\n&No", 2)
 
-        if confirm ~= 1 then
-            return
+            if confirm ~= 1 then
+                return
+            end
         end
 
         local ok, err = copy_file(src, dst)
@@ -839,6 +844,7 @@ function M.setup(opts)
         desc = "Import plugin loader state (config/path → data)",
         nargs = "?",
         complete = "file",
+        bang = true,
     })
 end
 
