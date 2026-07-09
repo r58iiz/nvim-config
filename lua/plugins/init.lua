@@ -267,8 +267,7 @@ return {
             {
                 -- [LSP] Mason.nvim
                 -- https://github.com/williamboman/mason.nvim
-                "KingMichaelPark/mason.nvim", -- "williamboman/mason.nvim"
-                commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
+                "williamboman/mason.nvim",
                 lazy = true,
             },
             {
