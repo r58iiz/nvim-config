@@ -14,6 +14,7 @@ function M.custom_setup()
         formatters_by_ft = {
             c = { "clang_format" },
             cpp = { "clang_format" },
+            go = { "gofumpt", "gofmt", stop_after_first = true },
             java = { "clang_format" },
             javascript = { "biome-check" },
             json = { "biome-check" },
