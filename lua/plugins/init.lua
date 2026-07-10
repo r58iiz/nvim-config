@@ -65,9 +65,7 @@ return {
     ["nvim-treesitter/nvim-treesitter"] = {
         -- [Highlighting] Treesitter
         -- https://github.com/nvim-treesitter/nvim-treesitter
-        lazy = true,
         build = ":TSUpdate",
-        event = { "BufReadPre", "BufNewFile" },
         cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
         config = function()
             require("plugins.configs.treesitter_config").custom_setup()
@@ -253,6 +251,13 @@ return {
         end,
     },
 
+    ["williamboman/mason.nvim"] = {
+        -- [LSP] Mason.nvim
+        -- https://github.com/williamboman/mason.nvim
+        "williamboman/mason.nvim",
+        cmd = { "Mason", "MasonInstall" },
+    },
+
     ["VonHeikemen/lsp-zero.nvim"] = {
         -- [LSP] LSP Zero
         -- https://github.com/VonHeikemen/lsp-zero.nvim
@@ -265,10 +270,7 @@ return {
         end,
         dependencies = {
             {
-                -- [LSP] Mason.nvim
-                -- https://github.com/williamboman/mason.nvim
                 "williamboman/mason.nvim",
-                lazy = true,
             },
             {
                 -- [LSP] Mason-lspconfig.nvim

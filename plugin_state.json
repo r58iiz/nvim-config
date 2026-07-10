@@ -16,6 +16,7 @@
 		"stevearc/conform.nvim": true,
 		"stevearc/oil.nvim": true,
 		"VonHeikemen/lsp-zero.nvim": true,
+		"williamboman/mason.nvim": true,
 		"yorickpeterse/nvim-window": true,
 		"akinsho/bufferline.nvim": false,
 		"folke/flash.nvim": false,
@@ -23,16 +24,18 @@
 		"folke/zen-mode.nvim": false,
 		"kevinhwang91/nvim-ufo": false,
 		"m4xshen/hardtime.nvim": false,
+		"MeanderingProgrammer/render-markdown.nvim": false,
 		"romgrk/barbar.nvim": false,
 		"RRethy/vim-illuminate": false,
 		"sindrets/diffview.nvim": false,
 		"stevearc/quicker.nvim": false
 	},
 	"themes": {
-		"webhooked/kanso.nvim": true,
+		"vimspectr-dark": true,
 		"AstroNvim/astrotheme": false,
 		"bluz71/vim-moonfly-colors": false,
 		"catppuccin/nvim": false,
+		"dasupradyumna/midnight.nvim": false,
 		"EdenEast/nightfox.nvim": false,
 		"folke/tokyonight.nvim": false,
 		"HoNamDuong/hybrid.nvim": false,
@@ -42,10 +45,13 @@
 		"navarasu/onedark.nvim": false,
 		"nyoom-engineering/oxocarbon.nvim": false,
 		"olimorris/onedarkpro.nvim": false,
+		"projekt0n/github-nvim-theme": false,
 		"rebelot/kanagawa.nvim": false,
 		"rose-pine/neovim": false,
 		"sainnhe/everforest": false,
+		"sainnhe/gruvbox-material": false,
 		"slugbyte/lackluster.nvim": false,
-		"vague-theme/vague.nvim": false
+		"vague-theme/vague.nvim": false,
+		"webhooked/kanso.nvim": false
 	}
 }
