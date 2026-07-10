@@ -275,25 +275,19 @@ return {
         end,
         dependencies = {
             {
-                "williamboman/mason.nvim",
-            },
-            {
                 -- [LSP] Mason-lspconfig.nvim
-                -- https://github.com/williamboman/mason-lspconfig.nvim
-                "williamboman/mason-lspconfig.nvim",
-                lazy = true,
+                -- https://github.com/mason-org/mason-lspconfig.nvim
+                "mason-org/mason-lspconfig.nvim",
             },
             {
                 -- [LSP] Builtin
                 -- https://github.com/neovim/nvim-lspconfig
                 "neovim/nvim-lspconfig",
-                lazy = true,
             },
             {
                 -- [LSP] Nvim-Cmp
                 -- https://github.com/hrsh7th/nvim-cmp
                 "hrsh7th/nvim-cmp",
-                lazy = true,
                 dependencies = {
                     { "hrsh7th/cmp-buffer" },
                     { "hrsh7th/cmp-nvim-lsp" },
