@@ -12,7 +12,6 @@
 		"numToStr/Comment.nvim": true,
 		"nvim-lualine/lualine.nvim": true,
 		"nvim-treesitter/nvim-treesitter": true,
-		"nvim-treesitter/nvim-treesitter-textobjects": true,
 		"rcarriga/nvim-notify": true,
 		"stevearc/conform.nvim": true,
 		"stevearc/oil.nvim": true,

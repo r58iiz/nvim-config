@@ -71,26 +71,8 @@ return {
         cond = function()
             return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
         end,
-    },
-
-    ["nvim-treesitter/nvim-treesitter-textobjects"] = {
-        -- [Treesitter Addon] Treesitter-textobjects
-        -- https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-        lazy = true,
         config = function()
-            require("nvim-treesitter.configs").setup({
-                textobjects = {
-                    lsp_interop = {
-                        enable = true,
-                        border = "none",
-                        floating_preview_opts = {},
-                        peek_definition_code = {
-                            [";pd"] = "@function.outer",
-                            [";pD"] = "@class.outer",
-                        },
-                    },
-                },
-            })
+            require("plugins.configs.treesitter_config").custom_setup()
         end,
     },
 

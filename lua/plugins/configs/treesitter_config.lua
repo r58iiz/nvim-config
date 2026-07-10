@@ -7,8 +7,10 @@ function M.custom_setup()
         return
     end
 
+    local install_dir = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "nvim-treesitter-parsers")
+
     treesitter.setup({
-        install_dir = vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "nvim-treesitter-parsers"),
+        install_dir = install_dir,
     })
 
     treesitter.install({
@@ -26,8 +28,6 @@ function M.custom_setup()
         "vim",
         "vimdoc",
     })
-
-    vim.opt.runtimepath:append(vim.fs.joinpath(vim.fn.stdpath("data"), "lazy", "nvim-treesitter-parsers"))
 end
 
 return M
