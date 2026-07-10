@@ -104,6 +104,7 @@ function M.custom_setup()
         formatting = {
             fields = { "abbr", "kind", "menu" },
             format = function(entry, vim_item)
+                vim_item.kind = string.format("%s %s", kind_icons[vim_item.kind] or "", vim_item.kind)
                 -- NOTE: order matters
                 vim_item.menu = ({
                     nvim_lsp = "[LSP]",

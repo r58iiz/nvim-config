@@ -56,7 +56,9 @@ return {
         lazy = true,
         event = { "BufWritePre" },
         cmd = { "ConformInfo" },
-        cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
+        cond = function()
+            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+        end,
         config = function()
             require("plugins.configs.lsp.conform_config").custom_setup()
         end,
@@ -66,9 +68,8 @@ return {
         -- [Highlighting] Treesitter
         -- https://github.com/nvim-treesitter/nvim-treesitter
         build = ":TSUpdate",
-        cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
-        config = function()
-            require("plugins.configs.treesitter_config").custom_setup()
+        cond = function()
+            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
         end,
     },
 
@@ -148,7 +149,9 @@ return {
         -- [LSP/Productivity] Comment.nvim
         -- https://github.com/numToStr/Comment.nvim
         lazy = false,
-        cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
+        cond = function()
+            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+        end,
         config = function()
             require("plugins.configs.comment_config").custom_setup()
         end,
@@ -181,8 +184,6 @@ return {
         -- [Jumping] Leap
         -- https://github.com/ggandor/leap.nvim
         url = "https://codeberg.org/andyg/leap.nvim",
-        event = "BufReadPost",
-        lazy = true,
     },
 
     ["rcarriga/nvim-notify"] = {
@@ -244,18 +245,20 @@ return {
     ["lewis6991/gitsigns.nvim"] = {
         -- [Git] Gitsigns
         -- https://github.com/lewis6991/gitsigns.nvim
-        "lewis6991/gitsigns.nvim",
         requires = { "nvim-lua/plenary.nvim" },
         config = function()
             require("plugins.configs.gitsigns_config").custom_setup()
         end,
     },
 
-    ["williamboman/mason.nvim"] = {
+    ["mason-org/mason.nvim"] = {
         -- [LSP] Mason.nvim
-        -- https://github.com/williamboman/mason.nvim
-        "williamboman/mason.nvim",
-        cmd = { "Mason", "MasonInstall" },
+        -- https://github.com/mason-org/mason.nvim
+        url = "https://github.com/KingMichaelPark/mason.nvim",
+        commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
+        config = function()
+            require("plugins.configs.lsp.mason_config").custom_setup()
+        end,
     },
 
     ["VonHeikemen/lsp-zero.nvim"] = {
@@ -264,7 +267,9 @@ return {
         branch = "v3.x",
         event = { "BufReadPre", "BufNewFile" },
         lazy = true,
-        cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
+        cond = function()
+            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+        end,
         config = function()
             require("plugins.configs.lsp.lsp_zero_config").custom_setup()
         end,
@@ -305,7 +310,9 @@ return {
         -- [Folding] nvim UFO
         -- https://github.com/kevinhwang91/nvim-ufo
         lazy = true,
-        cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
+        cond = function()
+            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+        end,
         keys = {
             {
                 "zR",
@@ -365,7 +372,9 @@ return {
         -- [LSP] vim-illuminate
         -- https://github.com/RRethy/vim-illuminate
         event = "BufRead",
-        cond = require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" }),
+        cond = function()
+            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+        end,
         config = function()
             require("plugins.configs.illuminate_config").custom_setup()
         end,

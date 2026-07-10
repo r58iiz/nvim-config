@@ -44,18 +44,17 @@ function M.custom_setup()
     if M.lsp_folding then
         ufo.setup({
             open_fold_hl_timeout = 150,
+            fold_virt_text_handler = handler,
         })
     else
         ufo.setup({
             open_fold_hl_timeout = 150,
+            fold_virt_text_handler = handler,
             provider_selector = function(bufnr, filetype, buftype)
                 return { "treesitter", "indent" }
             end,
         })
     end
-
-    local bufnr = vim.api.nvim_get_current_buf()
-    ufo.setFoldVirtTextHandler(bufnr, handler)
 end
 
 return M

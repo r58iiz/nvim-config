@@ -2,35 +2,6 @@
 -- Mode: Terminal
 -- =========================
 
--- function()
---     local curr_file_dir = vim.fn.expand("%:p:h")
---     local curr_file_dir_short = vim.fn.expand("%:h")
---
---     local orig_window = vim.api.nvim_get_current_win()
---     local term_buffer = vim.api.nvim_create_buf(true, false)
---     local term_window = vim.api.nvim_open_win(term_buffer, false, {
---         split = "below",
---         win = 0,
---         height = 5,
---     })
---
---     vim.api.nvim_set_current_win(term_window)
---     vim.fn.termopen(
---         "powershell.exe" .. " -NoLogo -NoExit -Command " .. "'cd \"" .. curr_file_dir .. "\";'",
---         {
---             on_exit = function(_, exit_code)
---                 vim.notify(
---                     "[B " .. term_buffer .. "] Terminal exited with code: " .. exit_code,
---                     vim.log.levels.WARN,
---                     { normal_notify = true }
---                 )
---             end,
---         }
---     )
---     vim.api.nvim_buf_set_name(term_buffer, "[PS] " .. curr_file_dir_short)
---     vim.api.nvim_set_current_win(orig_window)
--- end,
-
 local map = require("keymaps.helpers").map_all
 
 local mappings = {
@@ -45,19 +16,29 @@ local mappings = {
 
     {
         "n",
-        "<C-t>",
+        "<A-t>",
         function()
             local cwd = vim.fn.expand("%:p:h")
+            local cwd_short = vim.fn.expand("%:h")
             if cwd == "" then
                 cwd = vim.loop.cwd()
+                cwd_short = vim.fs.basename(cwd)
             end
 
             vim.cmd("belowright split")
             local win = vim.api.nvim_get_current_win()
             vim.api.nvim_win_set_height(win, 10)
 
-            vim.fn.termopen("powershell.exe -NoLogo -NoExit -Command cd '" .. cwd .. "'")
+            local buf = vim.api.nvim_create_buf(false, true)
+            vim.api.nvim_win_set_buf(win, buf)
 
+            vim.fn.termopen("powershell.exe -NoLogo -NoExit -Command cd '" .. cwd .. "'", {
+                on_exit = function(_, exit_code)
+                    vim.notify("[B " .. buf .. "] Terminal exited with code: " .. exit_code, vim.log.levels.WARN)
+                end,
+            })
+
+            vim.api.nvim_buf_set_name(buf, "[PS] " .. cwd_short)
             vim.cmd("startinsert")
         end,
         "Open terminal (cwd)",

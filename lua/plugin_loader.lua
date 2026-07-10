@@ -170,10 +170,6 @@ local section_types = {
             end
             return new_state
         end,
-
-        validate = function(state)
-            return true
-        end,
     },
 
     singleselect = {
@@ -186,16 +182,6 @@ local section_types = {
             local new_state = {}
             new_state[option_id] = true
             return new_state
-        end,
-
-        validate = function(state)
-            local count = 0
-            for _, v in pairs(state) do
-                if v then
-                    count = count + 1
-                end
-            end
-            return count == 1
         end,
     },
 }

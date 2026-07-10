@@ -24,13 +24,13 @@ function M.custom_setup()
             "fugitive",
         },
         -- filetypes_allowlist: filetypes to illuminate, this is overridden by filetypes_denylist
-        filetypes_allowlist = { "n" },
+        filetypes_allowlist = {},
         -- modes_denylist: modes to not illuminate, this overrides modes_allowlist
         -- See `:help mode()` for possible values
         modes_denylist = {},
         -- modes_allowlist: modes to illuminate, this is overridden by modes_denylist
         -- See `:help mode()` for possible values
-        modes_allowlist = {},
+        modes_allowlist = { "n" },
         -- providers_regex_syntax_denylist: syntax to not illuminate, this overrides providers_regex_syntax_allowlist
         providers_regex_syntax_denylist = {},
         -- providers_regex_syntax_allowlist: syntax to illuminate, this is overridden by providers_regex_syntax_denylist
