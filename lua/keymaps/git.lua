@@ -14,6 +14,7 @@ local mappings = {
     { "n", PREFIX .. "f", fzf("git_files"), "Git files" },
     { "n", PREFIX .. "l", fzf("git_blame"), "Git blame" },
     { "n", PREFIX .. "s", fzf("git_status"), "Git status" },
+    { "n", PREFIX .. "g", "<Cmd>Neogit<CR>", "Neogit" },
 }
 
 map(mappings, { silent = true })
