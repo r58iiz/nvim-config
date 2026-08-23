@@ -29,7 +29,7 @@ function M.custom_setup()
         },
         signcolumn = true,
         numhl = true,
-        linehl = true,
+        linehl = false,
         word_diff = false,
         watch_gitdir = {
             follow_files = true,
