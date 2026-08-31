@@ -4,8 +4,8 @@ local M = {}
 
 local enabled = {
     whitespace = true,
-    tab_eol = true,
-    lead = false,
+    tab = true,
+    eol_lead = false,
 }
 
 local function apply()
