@@ -101,6 +101,42 @@ local mappings = {
         end,
         "Toggle center cursor (Norm)",
     },
+
+    {
+        "n",
+        PREFIX .. "lw",
+        function()
+            require("custom.actions.listchars").toggle("whitespace")
+        end,
+        "Toggle whitespace chars",
+    },
+
+    {
+        "n",
+        PREFIX .. "lt",
+        function()
+            require("custom.actions.listchars").toggle("tab")
+        end,
+        "Toggle tab chars",
+    },
+
+    {
+        "n",
+        PREFIX .. "le",
+        function()
+            require("custom.actions.listchars").toggle("eol_lead")
+        end,
+        "Toggle EOL/lead chars",
+    },
+
+    {
+        "n",
+        PREFIX .. "la",
+        function()
+            require("custom.actions.listchars").disable_all()
+        end,
+        "Disable all listchars",
+    },
 }
 
 map(mappings)
