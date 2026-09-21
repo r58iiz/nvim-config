@@ -19,6 +19,7 @@ function M.custom_setup()
             javascript = { "biome-check" },
             json = { "biome-check" },
             lua = { "stylua" },
+            markdown = { "markdownlint" },
             python = { "autopep8", "black" },
             rust = { "rustfmt" },
             sh = { "shellharden", "shfmt" },
