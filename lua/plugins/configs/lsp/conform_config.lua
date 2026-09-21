@@ -28,7 +28,7 @@ function M.custom_setup()
             typescript = { "biome-check" },
         },
         format_after_save = {
-            lsp_fallback = true,
+            lsp_format = "fallback",
         },
         -- Customize formatters
         formatters = {
