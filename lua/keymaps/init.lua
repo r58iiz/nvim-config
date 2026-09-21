@@ -15,6 +15,7 @@ require("keymaps.terminal")
 require("keymaps.custom")
 require("keymaps.visual")
 require("keymaps.insert")
+require("keymaps.yank")
 
 require("keymaps.plugin_lazy")
 km.if_enabled("ibhagwan/fzf-lua", "keymaps.git")
