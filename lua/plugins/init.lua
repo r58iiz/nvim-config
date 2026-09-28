@@ -127,18 +127,6 @@ return {
         end,
     },
 
-    ["numToStr/Comment.nvim"] = {
-        -- [LSP/Productivity] Comment.nvim
-        -- https://github.com/numToStr/Comment.nvim
-        lazy = false,
-        cond = function()
-            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
-        end,
-        config = function()
-            require("plugins.configs.comment_config").custom_setup()
-        end,
-    },
-
     ["folke/twilight.nvim"] = {
         -- [Productivity] Twilight
         -- https://github.com/folke/twilight.nvim

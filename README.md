@@ -184,7 +184,6 @@ This behavior is not supported by upstream Mason and may break on update.
   - lervag/vimtex
   - lewis6991/gitsigns.nvim
   - lukas-reineke/indent-blankline.nvim
-  - numToStr/Comment.nvim
   - nvim-lualine/lualine.nvim
   - nvim-treesitter/nvim-treesitter
   - nvim-treesitter/nvim-treesitter-textobjects
