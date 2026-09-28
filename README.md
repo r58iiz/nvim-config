@@ -112,25 +112,25 @@ This behavior is not supported by upstream Mason and may break on update.
 
 1. Replace `KingMichaelPark/mason.nvim` with `williamboman/mason.nvim` and remove the pinned `commit` in [lua/plugins/init.lua#L260-L266](<https://github.com/r58iiz/nvim-config/blob/ff2d8642b3c4463f7118f2a903bb881a12f47055/lua/plugins/init.lua#L260-L266>)
 
-```diff
-            {
-                -- [LSP] Mason.nvim
-                -- https://github.com/williamboman/mason.nvim
-+               "williamboman/mason.nvim",
--               "KingMichaelPark/mason.nvim",
--                commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
-                lazy = true,
-            },
-```
+    ```diff
+                {
+                    -- [LSP] Mason.nvim
+                    -- https://github.com/williamboman/mason.nvim
+    +               "williamboman/mason.nvim",
+    -               "KingMichaelPark/mason.nvim",
+    -                commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
+                    lazy = true,
+                },
+    ```
 
 2. Remove the `use_uv` key from [lua/plugins/configs/lsp/lsp_zero_config.lua#L103-L106](<https://github.com/r58iiz/nvim-config/blob/ff2d8642b3c4463f7118f2a903bb881a12f47055/lua/plugins/configs/lsp/lsp_zero_config.lua#L103-L106>)
 
-```diff
-        pip = {
-            upgrade_pip = true,
--           use_uv = true,
-        },
-```
+    ```diff
+            pip = {
+                upgrade_pip = true,
+    -           use_uv = true,
+            },
+    ```
 
 ---
 
