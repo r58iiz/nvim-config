@@ -1,12 +1,10 @@
--- =========================
--- Plugin: Lazy
--- =========================
+local lib = require("keymaps.lib.map")
+local map = lib.map_all
 
 local PREFIX = "<leader>L"
+lib.group(PREFIX, "Lazy")
 
-local map = require("keymaps.helpers").map_all
-
-local mappings = {
+map({
     { "n", PREFIX .. "l", "<Cmd>Lazy<CR>", "Open Lazy" },
     { "n", PREFIX .. "p", "<Cmd>Lazy profile<CR>", "Show profile" },
     { "n", PREFIX .. "s", "<Cmd>Lazy sync<CR>", "Sync plugins" },
@@ -20,6 +18,4 @@ local mappings = {
         end,
         "Plugin manager",
     },
-}
-
-map(mappings, { silent = true })
+}, { silent = true })

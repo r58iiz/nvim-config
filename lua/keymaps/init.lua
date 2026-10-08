@@ -6,21 +6,20 @@
 -- term_mode = "t",
 -- command_mode = "c"
 
-local km = require("keymaps.utils")
+local lib = require("keymaps.lib.map")
 
-require("keymaps.core")
+require("keymaps.general")
+require("keymaps.editing")
+require("keymaps.clipboard")
+require("keymaps.navigation")
+require("keymaps.windows")
 require("keymaps.buffers")
 require("keymaps.tabs")
 require("keymaps.terminal")
-require("keymaps.custom")
-require("keymaps.visual")
-require("keymaps.insert")
-require("keymaps.yank")
+require("keymaps.find")
+require("keymaps.git")
+require("keymaps.text")
+require("keymaps.view")
+require("keymaps.plugins")
 
-require("keymaps.plugin_lazy")
-km.if_enabled("ibhagwan/fzf-lua", "keymaps.git")
-km.if_enabled("ibhagwan/fzf-lua", "keymaps.files")
-km.if_enabled("ggandor/leap.nvim", "keymaps.plugin_leap")
-km.if_enabled("folke/zen-mode.nvim", "keymaps.plugin_zen")
-km.if_enabled("hedyhli/outline.nvim", "keymaps.plugin_outline")
-km.if_enabled("yorickpeterse/nvim-window", "keymaps.plugin_window")
+lib.flush_groups()
