@@ -17,7 +17,7 @@ local function get_definition_client(bufnr)
     end
 end
 
-function M.peek_definition(bufnr)
+function M.open(bufnr)
     bufnr = bufnr or 0
 
     local client = get_definition_client(bufnr)
@@ -61,7 +61,7 @@ function M.peek_definition(bufnr)
                     col = col,
                 })
 
-                vim.api.nvim_win_set_option(win, "winhighlight", "Normal:Normal,FloatBorder:Border")
+                vim.wo[win].winhighlight = "Normal:Normal,FloatBorder:Border"
 
                 vim.api.nvim_win_set_cursor(win, {
                     range.start.line + 1,

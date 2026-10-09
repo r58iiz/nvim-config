@@ -1,5 +1,5 @@
 local api = vim.api
-local formatter = require("custom.lib.markdown.table_formatter")
+local formatter = require("custom.markdown_table.formatter")
 
 local M = {}
 

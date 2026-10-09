@@ -4,16 +4,16 @@ local map = lib.map_all
 local PREFIX = "<leader>c"
 lib.group(PREFIX, "Custom")
 
-local function action(name)
-    return require("custom.actions." .. name)
+local function feature(name)
+    return require("custom." .. name)
 end
 
 map({
     {
         "n",
-        PREFIX .. "sc",
+        PREFIX .. "S",
         function()
-            action("spellcheck").toggle()
+            feature("spellcheck").toggle()
         end,
         "Toggle spellcheck",
     },
@@ -21,7 +21,7 @@ map({
         "n",
         PREFIX .. "t",
         function()
-            action("change_tabsize").prompt()
+            feature("tabsize").prompt()
         end,
         "Change local tabsize",
     },
@@ -30,7 +30,7 @@ map({
         "n",
         PREFIX .. "f",
         function()
-            action("format_markdown_table").format()
+            feature("markdown_table").format()
         end,
         "Format table under cursor",
     },
@@ -38,7 +38,7 @@ map({
         "v",
         PREFIX .. "f",
         function()
-            action("format_markdown_table").format(vim.fn.line("v"), vim.fn.line("."))
+            feature("markdown_table").format(vim.fn.line("v"), vim.fn.line("."))
         end,
         "Format table in selected lines",
     },
@@ -47,7 +47,7 @@ map({
         "n",
         PREFIX .. "r",
         function()
-            action("renumber").form({ first = 1, last = vim.fn.line("$") })
+            feature("renumber").form({ first = 1, last = vim.fn.line("$") })
         end,
         "Renumber (whole file)",
     },
@@ -55,7 +55,7 @@ map({
         "x",
         PREFIX .. "r",
         function()
-            action("renumber").form()
+            feature("renumber").form()
         end,
         "Renumber (selection)",
     },

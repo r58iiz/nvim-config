@@ -7,7 +7,7 @@ map({
         "n",
         "<A-t>",
         function()
-            require("custom.actions.open_terminal").open_in_cwd()
+            require("custom.terminal").open_in_cwd()
         end,
         "Open terminal (cwd)",
     },

@@ -57,7 +57,7 @@ return {
         event = { "BufWritePre" },
         cmd = { "ConformInfo" },
         cond = function()
-            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+            return require("custom.filetype").disable_on_filetypes({ "text" })
         end,
         config = function()
             require("plugins.configs.lsp.conform_config").custom_setup()
@@ -69,7 +69,7 @@ return {
         -- https://github.com/nvim-treesitter/nvim-treesitter
         build = ":TSUpdate",
         cond = function()
-            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+            return require("custom.filetype").disable_on_filetypes({ "text" })
         end,
         config = function()
             require("plugins.configs.treesitter_config").custom_setup()
@@ -238,7 +238,7 @@ return {
         event = { "BufReadPre", "BufNewFile" },
         lazy = true,
         cond = function()
-            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+            return require("custom.filetype").disable_on_filetypes({ "text" })
         end,
         config = function()
             require("plugins.configs.lsp.lsp_zero_config").custom_setup()
@@ -275,7 +275,7 @@ return {
         -- https://github.com/kevinhwang91/nvim-ufo
         lazy = true,
         cond = function()
-            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+            return require("custom.filetype").disable_on_filetypes({ "text" })
         end,
         keys = {
             {
@@ -337,7 +337,7 @@ return {
         -- https://github.com/RRethy/vim-illuminate
         event = "BufRead",
         cond = function()
-            return require("custom.lib.buffer.filetype").disable_on_filetypes({ "text" })
+            return require("custom.filetype").disable_on_filetypes({ "text" })
         end,
         config = function()
             require("plugins.configs.illuminate_config").custom_setup()

@@ -19,7 +19,7 @@ local mappings = {
         "n",
         PREFIX .. "p",
         function()
-            require("custom.actions.peek_definition").peek_definition()
+            require("custom.peek_definition").open()
         end,
         "Peek definition",
     },

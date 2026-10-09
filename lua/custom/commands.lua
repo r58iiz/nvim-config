@@ -1,16 +1,16 @@
-vim.api.nvim_create_user_command("NvimClearUndoBackup", function()
-    local function normalize(dir)
-        if not dir or dir == "" then
-            return nil
-        end
-        -- remove trailing //
-        return dir:gsub("//+$", "")
+local function normalize_dir(dir)
+    if not dir or dir == "" then
+        return nil
     end
+    -- remove trailing //
+    return (dir:gsub("//+$", ""))
+end
 
+vim.api.nvim_create_user_command("NvimClearUndoBackup", function()
     local targets = {
-        normalize(vim.o.undodir),
-        normalize(vim.o.backupdir),
-        normalize(vim.o.directory),
+        normalize_dir(vim.o.undodir),
+        normalize_dir(vim.o.backupdir),
+        normalize_dir(vim.o.directory),
     }
 
     local cleared = {}
@@ -31,3 +31,7 @@ vim.api.nvim_create_user_command("NvimClearUndoBackup", function()
 end, {
     desc = "Clear directories configured via undodir/backupdir(/directory)",
 })
+
+vim.api.nvim_create_user_command("Renumber", function(cmd)
+    require("custom.renumber").command(cmd)
+end, { range = true, nargs = "*", desc = "Renumber matches: /pattern/[l] [step] [pad]" })

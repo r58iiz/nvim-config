@@ -1,19 +1,20 @@
-local listchars = require("custom.lib.ui.listchars")
+local chars = require("custom.listchars.chars")
 
 local M = {}
 
 local enabled = {
-    whitespace = true,
-    tab = true,
+    whitespace = false,
+    tab = false,
     eol_lead = false,
 }
 
 local function apply()
-    local chars = listchars.compute(enabled)
-    vim.opt.list = next(chars) ~= nil
-    vim.opt.listchars = chars
+    local active = chars.compute(enabled)
+    vim.opt.list = next(active) ~= nil
+    vim.opt.listchars = active
 end
 
+---@param group "whitespace"|"tab"|"eol_lead"
 function M.toggle(group)
     if enabled[group] == nil then
         vim.notify("Listchars: unknown group — " .. tostring(group), vim.log.levels.ERROR)
@@ -27,10 +28,6 @@ function M.disable_all()
     for group in pairs(enabled) do
         enabled[group] = false
     end
-    apply()
-end
-
-function M.setup()
     apply()
 end
 

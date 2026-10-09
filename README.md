@@ -147,14 +147,11 @@ This behavior is not supported by upstream Mason and may break on update.
 │   │   options.lua         # Neovim options
 │   │   plugin_loader.lua   # Custom "plugin loader"
 │   │
-│   ├───custom/             # Custom logic
-│   │   ├───actions/        # Keybinding-driven actions
-│   │   ├───commands/       # Commands
-│   │   └───lib/            # Reusable internal libraries
-│   │       ├───buffer/
-│   │       ├───lsp/
-│   │       ├───markdown/
-│   │       └───renumber/
+│   ├───custom/             # Custom logic, one module per feature
+│   │   │   commands.lua    # User commands (:Renumber, :NvimClearUndoBackup)
+│   │   ├───renumber/       # Feature with its own engine/form/args
+│   │   ├───markdown_table/
+│   │   └───listchars/
 │   │
 │   ├───keymaps/            # All keybindings, grouped by domain
 │   │

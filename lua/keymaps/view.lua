@@ -8,13 +8,13 @@ lib.group(PREFIX .. "l", "List chars")
 
 local function center(mode)
     return function()
-        require("custom.actions.center_cursor").toggle({ mode = mode })
+        require("custom.center_cursor").toggle({ mode = mode })
     end
 end
 
 local function listchars(kind)
     return function()
-        require("custom.actions.listchars").toggle(kind)
+        require("custom.listchars").toggle(kind)
     end
 end
 
@@ -30,7 +30,7 @@ map({
         "n",
         PREFIX .. "la",
         function()
-            require("custom.actions.listchars").disable_all()
+            require("custom.listchars").disable_all()
         end,
         "Disable all listchars",
     },

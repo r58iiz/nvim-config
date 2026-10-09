@@ -1,7 +1,7 @@
-local Rule = require("custom.lib.renumber.rule")
-local engine = require("custom.lib.renumber.engine")
-local form_mod = require("custom.lib.renumber.form")
-local parse_args = require("custom.lib.renumber.parse_args")
+local Rule = require("custom.renumber.rule")
+local engine = require("custom.renumber.engine")
+local form_mod = require("custom.renumber.form")
+local parse_args = require("custom.renumber.args")
 
 local M = {}
 

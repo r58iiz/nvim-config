@@ -1,7 +1,7 @@
 local lib = require("keymaps.lib.map")
 local map = lib.map_all
 local fzf = require("keymaps.lib.fzf").call
-local buf = require("custom.actions.buffer")
+local buf = require("custom.buffer")
 
 local PREFIX = "<leader>b"
 lib.group(PREFIX, "Buffers")

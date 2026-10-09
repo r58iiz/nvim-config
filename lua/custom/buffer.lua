@@ -8,6 +8,7 @@ function M.delete_all()
     end
 end
 
+--- Delete the current buffer but keep its window open on a blank buffer.
 function M.close_keep_window()
     local win = vim.api.nvim_get_current_win()
     local buf = vim.api.nvim_get_current_buf()

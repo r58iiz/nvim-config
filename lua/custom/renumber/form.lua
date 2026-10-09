@@ -1,5 +1,5 @@
-local Rule = require("custom.lib.renumber.rule")
-local engine = require("custom.lib.renumber.engine")
+local Rule = require("custom.renumber.rule")
+local engine = require("custom.renumber.engine")
 
 local function ensure_highlights()
     vim.api.nvim_set_hl(0, "RenumberMatch", { link = "Search", default = true })
