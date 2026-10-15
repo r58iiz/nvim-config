@@ -47,13 +47,6 @@ function M.custom_setup()
         require("keymaps.lsp").attach(bufnr)
     end)
 
-    lsp_zero.set_sign_icons({
-        error = "✘",
-        warn = "▲",
-        hint = "⚑",
-        info = "»",
-    })
-
     lsp.setup()
     lsp.extend_lspconfig()
 
