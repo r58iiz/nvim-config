@@ -1,8 +1,8 @@
 return {
-    ["vimspectr-dark"] = {
+    ["vimspectr"] = {
         -- [Theme] vimspectr
         -- https://github.com/haystackandroid/vimspectr
-        dir = vim.fs.joinpath(vim.fn.stdpath("config"), "lua", "plugins", "themes", "vimspectr-dark"),
+        dir = vim.fs.joinpath(vim.fn.stdpath("config"), "lua", "plugins", "themes", "vimspectr"),
         lazy = true,
         config = function()
             vim.g.vimspectr_hue = "grey"

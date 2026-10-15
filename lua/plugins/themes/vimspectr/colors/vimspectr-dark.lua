@@ -1,5 +1,5 @@
--- vimspectr-dark, a vim theme by nightsense
--- https://github.com/nightsense/vimspectr
+-- vimspectr-dark, a vim theme by haystackandroid
+-- https://github.com/haystackandroid/vimspectr
 --
 -- generated with a theme template adapted from base16-vim by Chris Kempson
 -- https://github.com/chriskempson/base16-vim
