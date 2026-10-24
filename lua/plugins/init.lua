@@ -225,7 +225,7 @@ return {
         -- [LSP] Mason.nvim
         -- https://github.com/mason-org/mason.nvim
         url = "https://github.com/KingMichaelPark/mason.nvim",
-        commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
+        commit = "6ca3f5fd6a57e7002c6c00342c17874c2bd5a029",
         config = function()
             require("plugins.configs.lsp.mason_config").custom_setup()
         end,

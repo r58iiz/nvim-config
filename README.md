@@ -64,7 +64,7 @@ Some language servers, Treesitter parsers, and formatters require a native toolc
 
 - **Mason installers**
   - `node`
-  - `python3` *(or `uv` with `KingMichaelPark/mason.nvim` @ `b0827eb6cee026d0ed2fabab081296705a92240e`)*
+  - `python3` *(or `uv`)*
   - `go` / `cargo` etc if required
 
 ### NixOS
@@ -90,7 +90,7 @@ Some language servers, Treesitter parsers, and formatters require a native toolc
   - `pkgs.gzip`
   - **Installers**
     - `pkgs.nodejs`
-    - `pkgs.python3` *(or `pkgs.uv` `KingMichaelPark/mason.nvim` @ `b0827eb6cee026d0ed2fabab081296705a92240e`)*
+    - `pkgs.python3` *(or `pkgs.uv`)*
     - `pkgs.go` / `pkgs.cargo` etc if required
 
 ---
@@ -104,7 +104,7 @@ Some language servers, Treesitter parsers, and formatters require a native toolc
 
 This configuration uses `uv` instead of `python3` for Mason installers when
 running `KingMichaelPark/mason.nvim` at commit
-`b0827eb6cee026d0ed2fabab081296705a92240e`.
+`6ca3f5fd6a57e7002c6c00342c17874c2bd5a029`.
 
 This behavior is not supported by upstream Mason and may break on update.
 
@@ -118,7 +118,7 @@ This behavior is not supported by upstream Mason and may break on update.
                     -- https://github.com/williamboman/mason.nvim
     +               "williamboman/mason.nvim",
     -               "KingMichaelPark/mason.nvim",
-    -                commit = "b0827eb6cee026d0ed2fabab081296705a92240e",
+    -                commit = "...",
                     lazy = true,
                 },
     ```
