@@ -28,6 +28,9 @@
 - [ ] [kosayoda/nvim-lightbulb](https://github.com/kosayoda/nvim-lightbulb)
 - [ ] [rmagatti/goto-preview](https://github.com/rmagatti/goto-preview)
 - [ ] [stefandtw/quickfix-reflector.vim](https://github.com/stefandtw/quickfix-reflector.vim)
+- [ ] [dense-analysis/ale](https://github.com/dense-analysis/ale)
+- [ ] [mfussenegger/nvim-lint](https://github.com/mfussenegger/nvim-lint)
+  - [ ] <https://gist.github.com/Norbiox/652befc91ca0f90014aec34eccee27b2>
 
 ## UI & Visual Feedback
 
