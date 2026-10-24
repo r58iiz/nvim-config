@@ -37,8 +37,22 @@ local mappings = {
         "Format selection",
     },
 
-    { "n", PREFIX .. "[", diag.goto_prev, "Prev diagnostic" },
-    { "n", PREFIX .. "]", diag.goto_next, "Next diagnostic" },
+    {
+        "n",
+        PREFIX .. "[",
+        function()
+            diag.jump({ count = -1, float = true })
+        end,
+        "Prev diagnostic",
+    },
+    {
+        "n",
+        PREFIX .. "]",
+        function()
+            diag.jump({ count = 1, float = true })
+        end,
+        "Next diagnostic",
+    },
     { "n", PREFIX .. "o", diag.open_float, "Open diagnostics" },
     { "n", PREFIX .. "q", diag.setloclist, "Diagnostics to loclist" },
     { "n", PREFIX .. "b", fzf("diagnostics_document"), "Buffer diagnostics (fzf)" },
